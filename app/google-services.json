@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "598145104744",
+    "project_id": "easyfilterproject",
+    "storage_bucket": "easyfilterproject.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:598145104744:android:552e92ceaa6620ac21b4dd",
+        "android_client_info": {
+          "package_name": "com.example.easyfilterporject"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfhkXa9Vf_uASa7BWBQaHPfYwRBs9PUTE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
