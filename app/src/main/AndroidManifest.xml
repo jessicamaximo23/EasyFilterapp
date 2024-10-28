@@ -33,9 +33,7 @@
         <activity
             android:name=".SignUpScreen"
             android:exported="false" />
-        <activity
-            android:name=".LoginScreen"
-            android:exported="false" />
+
     </application>
 
 </manifest>

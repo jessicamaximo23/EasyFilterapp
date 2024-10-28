@@ -1,5 +1,5 @@
-
 <?xml version="1.0" encoding="utf-8"?>
+
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -40,7 +40,6 @@
                 android:layout_marginTop="20dp"
                 android:textAlignment="center" />
 
-
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/textInputUsername"
                 android:layout_width="match_parent"
@@ -76,7 +75,6 @@
                     android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Campo para inserir a senha -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/textInputPassword"
                 android:layout_width="match_parent"
@@ -94,7 +92,6 @@
                     android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Botão para registro -->
             <Button
                 android:id="@+id/cirRegisterButton"
                 android:layout_width="wrap_content"
@@ -102,12 +99,8 @@
                 android:text="Register"
                 android:layout_marginTop="20dp"
                 android:layout_gravity="center_horizontal"
-                app:spinning_bar_width="4dp"
-                app:spinning_bar_color="@color/white"
-                app:initialCornerAngle="27dp"
                 android:backgroundTint="@color/primaryColor" />
 
-            <!-- Link para retornar ao login -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

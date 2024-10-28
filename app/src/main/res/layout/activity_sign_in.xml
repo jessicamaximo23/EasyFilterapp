@@ -91,9 +91,6 @@
                 android:text="Login"
                 android:layout_marginTop="20dp"
                 android:layout_gravity="center_horizontal"
-                app:spinning_bar_width="4dp"
-                app:spinning_bar_color="@color/white"
-                app:initialCornerAngle="27dp"
                 android:backgroundTint="@color/primaryColor" />
 
             <!-- Link para registro -->
