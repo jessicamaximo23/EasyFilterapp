@@ -34,7 +34,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Reset Your Password"
-                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textSize="20sp"
                 android:textColor="@color/primaryColor"
                 android:layout_marginTop="20dp"
                 android:textAlignment="center" />
@@ -68,7 +69,7 @@
                 app:initialCornerAngle="27dp"
                 android:backgroundTint="@color/primaryColor" />
 
-          
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
