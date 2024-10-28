@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,6 +16,7 @@ public class SignInScreen extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private EditText editTextEmail, editTextPassword;
+    private TextView resetPasswordButton, signUpButton ;
     private Button signInButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,8 +29,21 @@ public class SignInScreen extends AppCompatActivity {
         editTextEmail = findViewById(R.id.editTextEmail);
         editTextPassword = findViewById(R.id.editTextPassword);
         signInButton = findViewById(R.id.cirLoginButton);
+        signUpButton = findViewById(R.id.signUpButton);
+        resetPasswordButton = findViewById(R.id.resetPasswordButton);
 
         signInButton.setOnClickListener(view -> signInUser());
+
+        signUpButton.setOnClickListener(v -> {
+            Intent intent = new Intent(SignInScreen.this, SignUpScreen.class);
+            startActivity(intent);
+        });
+
+        // Redireciona para a tela de redefinição de senha
+        resetPasswordButton.setOnClickListener(v -> {
+            Intent intent = new Intent(SignInScreen.this, ResetScreen.class);
+            startActivity(intent);
+        });
 
     }
 

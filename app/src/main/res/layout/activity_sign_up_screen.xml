@@ -57,7 +57,6 @@
                     android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Campo para inserir o e-mail -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/textInputEmail"
                 android:layout_width="match_parent"
