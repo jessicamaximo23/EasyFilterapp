@@ -61,14 +61,14 @@ public class SignInScreen extends AppCompatActivity {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        // Login bem-sucedido, redireciona para a página principal ou outra tela
+
                         FirebaseUser user = mAuth.getCurrentUser();
-                        Toast.makeText(SignInScreen.this, "Login bem-sucedido", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SignInScreen.this, "Login Sucessful", Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(SignInScreen.this, MainActivity.class));
                         finish();
                     } else {
                         // Falha na autenticação, mostra mensagem de erro
-                        Toast.makeText(SignInScreen.this, "Falha na autenticação: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SignInScreen.this, "Authentication Failure: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
