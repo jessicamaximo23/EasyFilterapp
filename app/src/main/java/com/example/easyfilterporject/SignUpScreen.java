@@ -23,7 +23,6 @@ public class SignUpScreen extends AppCompatActivity {
 
         setContentView(R.layout.activity_sign_up_screen);
 
-        // Inicializa o FirebaseAuth
         mAuth = FirebaseAuth.getInstance();
 
 
@@ -37,14 +36,13 @@ public class SignUpScreen extends AppCompatActivity {
         editTextPassword = findViewById(R.id.editTextPassword);
         cirRegisterButton = findViewById(R.id.cirRegisterButton);
 
-        // Configura o clique do botão de registro
         cirRegisterButton.setOnClickListener(v -> createAccount());
     }
     private void createAccount() {
         String email = editTextEmail.getText().toString().trim();
         String password = editTextPassword.getText().toString().trim();
 
-        // Validação dos campos de entrada
+
         if (email.isEmpty()) {
             Toast.makeText(SignUpScreen.this, "Please enter your email", Toast.LENGTH_SHORT).show();
             return;
@@ -55,17 +53,15 @@ public class SignUpScreen extends AppCompatActivity {
             return;
         }
 
-        // Criar a conta com o Firebase
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        // Registro bem-sucedido
+
                         Toast.makeText(SignUpScreen.this, "Account created successfully", Toast.LENGTH_SHORT).show();
-                        // Redirecionar para a tela de login ou a tela principal
-                        // startActivity(new Intent(SignUpScreen.this, SignInScreen.class)); // Exemplo de redirecionamento
-                        finish(); // Finaliza a atividade atual
+
+                        finish();
                     } else {
-                        // Falha no registro
+
                         Toast.makeText(SignUpScreen.this, "Registration failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
