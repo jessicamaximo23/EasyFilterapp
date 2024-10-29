@@ -1,67 +1,80 @@
 package com.example.easyfilterporject;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.IOException;
+
 public class GalleryActivity extends AppCompatActivity {
 
-    private static final int PICK_IMAGES_REQUEST = 1;
-    private LinearLayout imageContainer;
+    private static final int PICK_IMAGE_REQUEST = 2;
+    private ImageView imageView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_gallery);
-//        imageContainer = findViewById(R.id.imageContainer);
+        imageView = findViewById(R.id.imageView);
 
         // Chama o método para abrir a galeria com seleção múltipla
         openGallery();
 
     }
+
+
     private void openGallery() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true); // Permite seleção múltipla
-        startActivityForResult(Intent.createChooser(intent, "Selecione Imagens"), PICK_IMAGES_REQUEST);
+        startActivityForResult(intent, PICK_IMAGE_REQUEST);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == PICK_IMAGES_REQUEST && resultCode == RESULT_OK && data != null) {
-            // Limpa o container para novas imagens selecionadas
-            imageContainer.removeAllViews();
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
+            Uri selectedImageUri = data.getData();
+            try {
+                // Carregar a imagem selecionada da galeria
+                Bitmap selectedImageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImageUri);
 
-            if (data.getClipData() != null) {
-                // Múltiplas imagens selecionadas
-                int count = data.getClipData().getItemCount();
-                for (int i = 0; i < count; i++) {
-                    Uri imageUri = data.getClipData().getItemAt(i).getUri();
-                    addImageToContainer(imageUri);
-                }
-            } else if (data.getData() != null) {
-                // Apenas uma imagem selecionada
-                Uri imageUri = data.getData();
-                addImageToContainer(imageUri);
+                // Aplicar filtro simples (exemplo: converter para tons de cinza)
+                Bitmap filteredBitmap = applyGrayScaleFilter(selectedImageBitmap);
+
+                // Exibir a imagem filtrada na ImageView
+                imageView.setImageBitmap(filteredBitmap);
+
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
 
-    private void addImageToContainer(Uri imageUri) {
-        ImageView imageView = new ImageView(this);
-        imageView.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                300 // Altura fixa para cada imagem
-        ));
-        imageView.setImageURI(imageUri);
-        imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
-        imageContainer.addView(imageView);
+    private Bitmap applyGrayScaleFilter(Bitmap original) {
+        Bitmap grayScaleBitmap = Bitmap.createBitmap(original.getWidth(), original.getHeight(), Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(grayScaleBitmap);
+        Paint paint = new Paint();
+        ColorMatrix colorMatrix = new ColorMatrix();
+        colorMatrix.setSaturation(0); // Reduz saturação para 0 (tons de cinza)
+        ColorMatrixColorFilter colorFilter = new ColorMatrixColorFilter(colorMatrix);
+        paint.setColorFilter(colorFilter);
+        canvas.drawBitmap(original, 0, 0, paint);
+        return grayScaleBitmap;
     }
 }
+
