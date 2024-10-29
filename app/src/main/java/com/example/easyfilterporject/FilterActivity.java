@@ -22,8 +22,8 @@ public class FilterActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_filter);
         imageView = findViewById(R.id.imageView);
-        brightnessSeekBar = findViewById(R.id.brightnessSeekBar);
-        contrastSeekBar = findViewById(R.id.contrastSeekBar);
+//        brightnessSeekBar = findViewById(R.id.brightnessSeekBar);
+//        contrastSeekBar = findViewById(R.id.contrastSeekBar);
 
         // Ajuste de brilho
         brightnessSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
