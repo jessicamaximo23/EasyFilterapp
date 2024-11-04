@@ -1,5 +1,6 @@
 package com.example.easyfilterporject;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -8,9 +9,13 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -18,31 +23,34 @@ public class MainActivity extends AppCompatActivity {
 
     //show the email adress
     private  FirebaseAuth auth;
+    private static final int CAMERA_PERMISSION_REQUEST_CODE = 100;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
-
+    private ImageView imageView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
 
         auth = FirebaseAuth.getInstance();
-
         FirebaseUser currentUser = auth.getCurrentUser();
         TextView emailTextView = findViewById(R.id.textViewEmail);
+        imageView = findViewById(R.id.imageView);
 
-        // Exibir o email se o usuário estiver conectado
+        // Check if user is signed in (non-null) and update UI accordingly.
         if (currentUser != null) {
             emailTextView.setText("Email: " + currentUser.getEmail());
         } else {
             emailTextView.setText("Can't found email");
         }
 
+        //When I click on one or other icon
         ImageView iconOpenGallery = findViewById(R.id.iconOpenGallery);
         ImageView iconApplyFilter = findViewById(R.id.iconApplyFilter);
         ImageView iconTakePhoto = findViewById(R.id.iconTakePhoto);
-        TextView textViewEmail = findViewById(R.id.textViewEmail);
 
+        findViewById(R.id.iconTakePhoto).setOnClickListener(v -> checkCameraPermission());
+
+        //intent for open gallery
         iconOpenGallery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -51,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Apply Filter
+        // intent for Apply Filter
         iconApplyFilter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -60,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Take photo
+        //  intent for Take photo
         iconTakePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -70,8 +78,10 @@ public class MainActivity extends AppCompatActivity {
     }
     private void checkCameraPermission() {
 
-        if (checkSelfPermission(android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{android.Manifest.permission.CAMERA}, REQUEST_IMAGE_CAPTURE);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUEST_CODE);
         } else {
             openCamera();
         }
@@ -84,12 +94,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
+
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK && data != null) {
             Bitmap imageBitmap = (Bitmap) data.getExtras().get("data");
-            ImageView imageView = findViewById(R.id.imageView);
             imageView.setImageBitmap(imageBitmap);
         }
 }

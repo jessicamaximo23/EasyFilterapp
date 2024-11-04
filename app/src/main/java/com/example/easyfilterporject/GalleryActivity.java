@@ -38,9 +38,11 @@ public class GalleryActivity extends AppCompatActivity {
     private void openGallery() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
     }
 
+    //Convert this URI image for BITMAP
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -48,13 +50,13 @@ public class GalleryActivity extends AppCompatActivity {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
             Uri selectedImageUri = data.getData();
             try {
-                // Carregar a imagem selecionada da galeria
+                // Load the image  for gallery
                 Bitmap selectedImageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImageUri);
 
                 // Aplicar filtro simples (exemplo: converter para tons de cinza)
                 Bitmap filteredBitmap = applyGrayScaleFilter(selectedImageBitmap);
 
-                // Exibir a imagem filtrada na ImageView
+                // Show the image ImageView
                 imageView.setImageBitmap(filteredBitmap);
 
             } catch (IOException e) {
@@ -70,7 +72,7 @@ public class GalleryActivity extends AppCompatActivity {
         Canvas canvas = new Canvas(grayScaleBitmap);
         Paint paint = new Paint();
         ColorMatrix colorMatrix = new ColorMatrix();
-        colorMatrix.setSaturation(0); // Reduz saturação para 0 (tons de cinza)
+        colorMatrix.setSaturation(0);
         ColorMatrixColorFilter colorFilter = new ColorMatrixColorFilter(colorMatrix);
         paint.setColorFilter(colorFilter);
         canvas.drawBitmap(original, 0, 0, paint);
