@@ -52,7 +52,6 @@ public class SignInScreen extends AppCompatActivity {
         String email = editTextEmail.getText().toString().trim();
         String password = editTextPassword.getText().toString().trim();
 
-
         if (email.isEmpty() || password.isEmpty()) {
             Toast.makeText(SignInScreen.this, "Please, insert your best email and password", Toast.LENGTH_SHORT).show();
             return;
@@ -64,12 +63,19 @@ public class SignInScreen extends AppCompatActivity {
 
                         FirebaseUser user = mAuth.getCurrentUser();
                         Toast.makeText(SignInScreen.this, "Login Sucessful", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(SignInScreen.this, MainActivity.class));
+
+                        //Login in email admin and show a new screen
+                        if (email.equals("jessicamaximo23@gmail.com")) {
+                            startActivity(new Intent(SignInScreen.this, AdminPanelActivity.class));
+
+                        } else {
+                            // Falha na autenticação, mostra mensagem de erro
+                            Toast.makeText(SignInScreen.this, "Authentication Failure: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        }
                         finish();
-                    } else {
-                        // Falha na autenticação, mostra mensagem de erro
+                    } else{
                         Toast.makeText(SignInScreen.this, "Authentication Failure: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                    }
+                        }
                 });
     }
 
