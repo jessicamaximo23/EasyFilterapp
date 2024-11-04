@@ -48,36 +48,42 @@ public class SignInScreen extends AppCompatActivity {
     }
 
     private void signInUser() {
-
         String email = editTextEmail.getText().toString().trim();
         String password = editTextPassword.getText().toString().trim();
 
         if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(SignInScreen.this, "Please, insert your best email and password", Toast.LENGTH_SHORT).show();
+            Toast.makeText(SignInScreen.this, "Please, insert email and password", Toast.LENGTH_SHORT).show();
             return;
         }
 
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-
                         FirebaseUser user = mAuth.getCurrentUser();
-                        Toast.makeText(SignInScreen.this, "Login Sucessful", Toast.LENGTH_SHORT).show();
 
-                        //Login in email admin and show a new screen
-                        if (email.equals("jessicamaximo23@gmail.com")) {
-                            startActivity(new Intent(SignInScreen.this, AdminPanelActivity.class));
+                        if (user != null) {
+                            Toast.makeText(SignInScreen.this, "Login Successful", Toast.LENGTH_SHORT).show();
 
+                            // Bloco try-catch para abrir o AdminPanelActivity
+                            try {
+                                if (email.equals("jessicamaximo23@gmail.com")) {
+                                    startActivity(new Intent(SignInScreen.this, AdminPanelActivity.class));
+                                } else {
+                                    startActivity(new Intent(SignInScreen.this, MainActivity.class));
+                                }
+
+                                finish(); // Finaliza a SignInScreen após abrir a tela correta
+                            } catch (Exception e) {
+                                Toast.makeText(SignInScreen.this, "Error opening Admin Panel: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
                         } else {
-                            // Falha na autenticação, mostra mensagem de erro
-                            Toast.makeText(SignInScreen.this, "Authentication Failure: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SignInScreen.this, "User is null after login", Toast.LENGTH_SHORT).show();
                         }
-                        finish();
-                    } else{
-                        Toast.makeText(SignInScreen.this, "Authentication Failure: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                        }
+
+                    } else {
+                        Toast.makeText(SignInScreen.this, "Try again: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
                 });
     }
-
 
 }
