@@ -1,6 +1,7 @@
 package com.example.easyfilterporject;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -16,6 +17,9 @@ import com.google.firebase.database.DataSnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 
 public class AdminPanelActivity extends AppCompatActivity {
 
@@ -58,11 +62,15 @@ public class AdminPanelActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 userList.clear();
+
                 for (DataSnapshot userSnapshot : snapshot.getChildren()) {
                     User user = userSnapshot.getValue(User.class);
                     if (user != null) {
                         user.setId(userSnapshot.getKey());
                         userList.add(user);
+
+                        Log.d("AdminPanelActivity", "Loaded user: " + user.getEmail());
+
                     }
                 }
                 usersAdapter.notifyDataSetChanged();
@@ -89,6 +97,7 @@ public class AdminPanelActivity extends AppCompatActivity {
         dialogBuilder.setTitle("Edit Email")
                 .setView(editTextNewEmail)
                 .setPositiveButton("Save", (dialog, which) -> {
+
                     String newEmail = editTextNewEmail.getText().toString().trim();
                     if (!newEmail.isEmpty()) {
                         updateUserEmail(user.getId(), newEmail);
@@ -101,10 +110,26 @@ public class AdminPanelActivity extends AppCompatActivity {
     }
 
     private void updateUserEmail(String userId, String newEmail) {
+        // Primeiro, atualize o e-mail no Realtime Database
         HashMap<String, Object> updates = new HashMap<>();
         updates.put("email", newEmail);
         usersRef.child(userId).updateChildren(updates)
-                .addOnSuccessListener(aVoid -> Toast.makeText(AdminPanelActivity.this, "Email updated", Toast.LENGTH_SHORT).show())
-                .addOnFailureListener(e -> Toast.makeText(AdminPanelActivity.this, "Failed to update email", Toast.LENGTH_SHORT).show());
+                .addOnSuccessListener(aVoid -> {
+                    // Agora, atualize o e-mail na autenticação do Firebase
+                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                    if (user != null && user.getUid().equals(userId)) {
+                        user.updateEmail(newEmail)
+                                .addOnCompleteListener(task -> {
+                                    if (task.isSuccessful()) {
+                                        Toast.makeText(AdminPanelActivity.this, "Email updated in Authentication", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        Toast.makeText(AdminPanelActivity.this, "Failed to update email in Authentication", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    } else {
+                        Toast.makeText(AdminPanelActivity.this, "User not authenticated", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> Toast.makeText(AdminPanelActivity.this, "Failed to update email in database", Toast.LENGTH_SHORT).show());
     }
 }

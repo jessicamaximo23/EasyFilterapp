@@ -34,6 +34,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
         User user = users.get(position);
+
         holder.textViewUserEmail.setText(user.getEmail());
 
         holder.buttonEditUser.setOnClickListener(v -> onUserClickListener.onEditClick(user));
