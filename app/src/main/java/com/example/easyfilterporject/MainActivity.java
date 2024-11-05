@@ -104,4 +104,15 @@ public class MainActivity extends AppCompatActivity {
             imageView.setImageBitmap(imageBitmap);
         }
 }
+
+
+    private void openAdminPanel(String email) {
+        if (email.equals("jessicamaximo23@gmail.com")) { // Verifique se o e-mail é o do admin
+            Intent intent = new Intent(MainActivity.this, AdminPanelActivity.class);
+            startActivity(intent);
+        } else {
+            Toast.makeText(MainActivity.this, "Você não tem acesso ao painel de admin.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 }

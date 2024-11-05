@@ -1,7 +1,9 @@
 package com.example.easyfilterporject;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -27,13 +29,14 @@ public class AdminPanelActivity extends AppCompatActivity {
     private DatabaseReference usersRef;
     private ArrayList<User> userList;
     private UsersAdapter usersAdapter;
+    private Button buttonLogout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_panel);
 
-        recyclerViewUsers = findViewById(R.id.recyclerViewusers);
+        recyclerViewUsers = findViewById(R.id.recyclerViewUsers);
         recyclerViewUsers.setLayoutManager(new LinearLayoutManager(this));
 
         usersRef = FirebaseDatabase.getInstance().getReference("users");
@@ -55,7 +58,18 @@ public class AdminPanelActivity extends AppCompatActivity {
         recyclerViewUsers.setAdapter(usersAdapter);
 
         loadUsers();
+
+        buttonLogout = findViewById(R.id.buttonLogout);
+
+        buttonLogout.setOnClickListener(view -> {
+            FirebaseAuth.getInstance().signOut();
+            Intent intent = new Intent(AdminPanelActivity.this, SignInScreen.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();
+        });
     }
+
 
     private void loadUsers() {
         usersRef.addValueEventListener(new ValueEventListener() {
@@ -69,7 +83,7 @@ public class AdminPanelActivity extends AppCompatActivity {
                         user.setId(userSnapshot.getKey());
                         userList.add(user);
 
-                        Log.d("AdminPanelActivity", "Loaded user: " + user.getEmail());
+                        Log.d("Admin Panel", "Loaded user: " + user.getEmail());
 
                     }
                 }
@@ -121,15 +135,15 @@ public class AdminPanelActivity extends AppCompatActivity {
                         user.updateEmail(newEmail)
                                 .addOnCompleteListener(task -> {
                                     if (task.isSuccessful()) {
-                                        Toast.makeText(AdminPanelActivity.this, "Email updated in Authentication", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(AdminPanelActivity.this, "Email updated ", Toast.LENGTH_SHORT).show();
                                     } else {
-                                        Toast.makeText(AdminPanelActivity.this, "Failed to update email in Authentication", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(AdminPanelActivity.this, "Failed to update email ", Toast.LENGTH_SHORT).show();
                                     }
                                 });
                     } else {
                         Toast.makeText(AdminPanelActivity.this, "User not authenticated", Toast.LENGTH_SHORT).show();
                     }
                 })
-                .addOnFailureListener(e -> Toast.makeText(AdminPanelActivity.this, "Failed to update email in database", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> Toast.makeText(AdminPanelActivity.this, "Failed to update email ", Toast.LENGTH_SHORT).show());
     }
 }

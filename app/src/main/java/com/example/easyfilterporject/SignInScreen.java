@@ -18,13 +18,13 @@ public class SignInScreen extends AppCompatActivity {
     private EditText editTextEmail, editTextPassword;
     private TextView resetPasswordButton, signUpButton ;
     private Button signInButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
 
         mAuth = FirebaseAuth.getInstance();
-
 
         editTextEmail = findViewById(R.id.editTextEmail);
         editTextPassword = findViewById(R.id.editTextPassword);
