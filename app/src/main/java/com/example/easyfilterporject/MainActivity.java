@@ -21,7 +21,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
 
-    //show the email adress
+
     private  FirebaseAuth auth;
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 100;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -36,9 +36,9 @@ public class MainActivity extends AppCompatActivity {
         TextView emailTextView = findViewById(R.id.textViewEmail);
         imageView = findViewById(R.id.imageView);
 
-        // Check if user is signed in (non-null) and update UI accordingly.
+    
         if (currentUser != null) {
-            emailTextView.setText("Email: " + currentUser.getEmail());
+            emailTextView.setText("Welcome: " + currentUser.getEmail());
         } else {
             emailTextView.setText("Can't found email");
         }

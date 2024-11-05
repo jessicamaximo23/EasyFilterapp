@@ -19,12 +19,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Edit"
-        android:background="@color/black" />
+        />
 
     <Button
         android:id="@+id/buttonDeleteUser"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Delete"
-        android:background="@color/black" />
+      />
 </LinearLayout>
