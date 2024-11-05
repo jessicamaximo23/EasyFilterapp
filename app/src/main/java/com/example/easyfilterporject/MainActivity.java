@@ -107,11 +107,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void openAdminPanel(String email) {
-        if (email.equals("jessicamaximo23@gmail.com")) { // Verifique se o e-mail é o do admin
+        if (email.equals("jessicamaximo23@gmail.com")) {
             Intent intent = new Intent(MainActivity.this, AdminPanelActivity.class);
             startActivity(intent);
-        } else {
-            Toast.makeText(MainActivity.this, "Você não tem acesso ao painel de admin.", Toast.LENGTH_SHORT).show();
         }
     }
 

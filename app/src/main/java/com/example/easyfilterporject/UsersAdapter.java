@@ -15,6 +15,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     private final OnUserClickListener onUserClickListener;
 
     public interface OnUserClickListener {
+
         void onEditClick(User user);
         void onDeleteClick(String userId);
     }
@@ -34,7 +35,6 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
         User user = users.get(position);
-
         holder.textViewUserEmail.setText(user.getEmail());
 
         holder.buttonEditUser.setOnClickListener(v -> onUserClickListener.onEditClick(user));
@@ -48,8 +48,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
 
     static class UserViewHolder extends RecyclerView.ViewHolder {
         TextView textViewUserEmail;
-        Button buttonEditUser;
-        Button buttonDeleteUser;
+        Button buttonEditUser,buttonDeleteUser;
 
         UserViewHolder(View itemView) {
             super(itemView);

@@ -23,7 +23,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 
-public class AdminPanelActivity extends AppCompatActivity {
+public class AdminPanelActivity extends AppCompatActivity  {
 
     private RecyclerView recyclerViewUsers;
     private DatabaseReference usersRef;
@@ -82,8 +82,6 @@ public class AdminPanelActivity extends AppCompatActivity {
                     if (user != null) {
                         user.setId(userSnapshot.getKey());
                         userList.add(user);
-
-                        Log.d("Admin Panel", "Loaded user: " + user.getEmail());
 
                     }
                 }

@@ -11,6 +11,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class SignInScreen extends AppCompatActivity {
 
@@ -64,6 +66,8 @@ public class SignInScreen extends AppCompatActivity {
                         if (user != null) {
                             Toast.makeText(SignInScreen.this, "Login Successful", Toast.LENGTH_SHORT).show();
 
+                            DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users").child(user.getUid());
+
                             // Bloco try-catch para abrir o AdminPanelActivity
                             try {
                                 if (email.equals("jessicamaximo23@gmail.com")) {
@@ -72,7 +76,7 @@ public class SignInScreen extends AppCompatActivity {
                                     startActivity(new Intent(SignInScreen.this, MainActivity.class));
                                 }
 
-                                finish(); // Finaliza a SignInScreen após abrir a tela correta
+                                finish();
                             } catch (Exception e) {
                                 Toast.makeText(SignInScreen.this, "Error opening Admin Panel: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             }

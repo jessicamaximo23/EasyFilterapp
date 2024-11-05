@@ -1,5 +1,6 @@
 package com.example.easyfilterporject;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,6 +13,10 @@ import androidx.core.view.WindowInsetsCompat;
 
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 public class SignUpScreen extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
@@ -42,27 +47,32 @@ public class SignUpScreen extends AppCompatActivity {
         String email = editTextEmail.getText().toString().trim();
         String password = editTextPassword.getText().toString().trim();
 
-
-        if (email.isEmpty()) {
-            Toast.makeText(SignUpScreen.this, "Please enter your email", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (password.isEmpty()) {
-            Toast.makeText(SignUpScreen.this, "Please enter your password", Toast.LENGTH_SHORT).show();
+        if (email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(SignUpScreen.this, "Please insert email and password", Toast.LENGTH_SHORT).show();
             return;
         }
 
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
 
-                        Toast.makeText(SignUpScreen.this, "Account created successfully", Toast.LENGTH_SHORT).show();
+                            DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+                            String userId = user.getUid();
 
-                        finish();
+                            usersRef.child(userId).setValue(new User(email))
+                                    .addOnSuccessListener(aVoid -> {
+                                        Toast.makeText(SignUpScreen.this, "User registered successfully!", Toast.LENGTH_SHORT).show();
+                                        startActivity(new Intent(SignUpScreen.this, SignInScreen.class));
+                                        finish();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Toast.makeText(SignUpScreen.this, "Failed to save user: " , Toast.LENGTH_SHORT).show();
+                                    });
+                        }
                     } else {
-
-                        Toast.makeText(SignUpScreen.this, "Registration failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SignUpScreen.this, "Registration failed: " , Toast.LENGTH_SHORT).show();
                     }
                 });
     }
