@@ -2,7 +2,6 @@ package com.example.easyfilterporject;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -27,6 +26,7 @@ public class AdminPanelActivity extends AppCompatActivity  {
 
     private RecyclerView recyclerViewUsers;
     private DatabaseReference usersRef;
+    private FirebaseAuth auth;
     private ArrayList<User> userList;
     private UsersAdapter usersAdapter;
     private Button buttonLogout;
@@ -35,6 +35,15 @@ public class AdminPanelActivity extends AppCompatActivity  {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_panel);
+
+        auth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = auth.getCurrentUser();
+
+        if (currentUser == null || !currentUser.getEmail().equals("jessicamaximo23@gmail.com")) {
+            Toast.makeText(this, "Access Denied: Admin Only", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
         recyclerViewUsers = findViewById(R.id.recyclerViewUsers);
         recyclerViewUsers.setLayoutManager(new LinearLayoutManager(this));
@@ -56,7 +65,6 @@ public class AdminPanelActivity extends AppCompatActivity  {
         });
 
         recyclerViewUsers.setAdapter(usersAdapter);
-
         loadUsers();
 
         buttonLogout = findViewById(R.id.buttonLogout);
@@ -96,11 +104,21 @@ public class AdminPanelActivity extends AppCompatActivity  {
     }
 
     private void deleteUser(String userId) {
-        usersRef.child(userId).removeValue()
-                .addOnSuccessListener(aVoid -> Toast.makeText(AdminPanelActivity.this, "User deleted", Toast.LENGTH_SHORT).show())
-                .addOnFailureListener(e -> Toast.makeText(AdminPanelActivity.this, "Failed to delete user", Toast.LENGTH_SHORT).show());
-    }
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
+         if (currentUser != null && currentUser.getEmail().equals("jessicamaximo23@gmail.com")) {
+            // O administrador pode excluir qualquer usuário
+            usersRef.child(userId).removeValue()
+                    .addOnSuccessListener(aVoid ->
+                            Toast.makeText(AdminPanelActivity.this, "User deleted from Database", Toast.LENGTH_SHORT).show()
+                    )
+                    .addOnFailureListener(e ->
+                            Toast.makeText(AdminPanelActivity.this, "Failed to delete user from Database", Toast.LENGTH_SHORT).show()
+                    );
+        } else {
+            Toast.makeText(AdminPanelActivity.this, "Access Denied: Admin Only", Toast.LENGTH_SHORT).show();
+        }
+    }
     private void showEditDialog(User user) {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         final EditText editTextNewEmail = new EditText(this);
@@ -122,26 +140,22 @@ public class AdminPanelActivity extends AppCompatActivity  {
     }
 
     private void updateUserEmail(String userId, String newEmail) {
-        // Primeiro, atualize o e-mail no Realtime Database
-        HashMap<String, Object> updates = new HashMap<>();
-        updates.put("email", newEmail);
-        usersRef.child(userId).updateChildren(updates)
-                .addOnSuccessListener(aVoid -> {
-                    // Agora, atualize o e-mail na autenticação do Firebase
-                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                    if (user != null && user.getUid().equals(userId)) {
-                        user.updateEmail(newEmail)
-                                .addOnCompleteListener(task -> {
-                                    if (task.isSuccessful()) {
-                                        Toast.makeText(AdminPanelActivity.this, "Email updated ", Toast.LENGTH_SHORT).show();
-                                    } else {
-                                        Toast.makeText(AdminPanelActivity.this, "Failed to update email ", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                    } else {
-                        Toast.makeText(AdminPanelActivity.this, "User not authenticated", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(e -> Toast.makeText(AdminPanelActivity.this, "Failed to update email ", Toast.LENGTH_SHORT).show());
+
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (currentUser != null && currentUser.getEmail().equals("jessicamaximo23@gmail.com")) {
+            // O administrador pode editar o e-mail de qualquer usuário
+            HashMap<String, Object> updates = new HashMap<>();
+            updates.put("email", newEmail);
+            usersRef.child(userId).updateChildren(updates)
+                    .addOnSuccessListener(aVoid ->
+                            Toast.makeText(AdminPanelActivity.this, "Email updated in Database", Toast.LENGTH_SHORT).show()
+                    )
+                    .addOnFailureListener(e ->
+                            Toast.makeText(AdminPanelActivity.this, "Failed to update email in Database", Toast.LENGTH_SHORT).show()
+                    );
+        } else {
+            Toast.makeText(AdminPanelActivity.this, "Access Denied: Admin Only", Toast.LENGTH_SHORT).show();
+        }
     }
 }

@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
-    id("com.google.gms.google-services")
+    id("com.google.gms.google-services")  // Aplica o plugin do Google Services aqui
 }
 
 android {
@@ -43,13 +43,17 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-    // Import the Firebase BoM
+    // Importando o Firebase BoM para versões automáticas
     implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
 
-    // Add Firebase SDKs without specifying versions
+    // Adicionando SDKs do Firebase
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
-
+    implementation ("com.google.firebase:firebase-functions:20.1.0")
     implementation ("jp.co.cyberagent.android:gpuimage:2.1.0")
+    // Firebase Authentication
+    implementation ("com.google.firebase:firebase-auth:21.0.5")
+    // Firebase Realtime Database
+    implementation ("com.google.firebase:firebase-database:20.0.4")
 }
