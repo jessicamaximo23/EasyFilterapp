@@ -38,18 +38,17 @@ public class MainActivity extends AppCompatActivity {
         FirebaseUser currentUser = auth.getCurrentUser();
         TextView emailTextView = findViewById(R.id.textViewEmail);
         imageView = findViewById(R.id.imageView);
-        ImageButton buttonBack = findViewById(R.id.buttonBack);
+        buttonBack = findViewById(R.id.buttonBack);
 
         buttonBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Navegar para a tela de login
+
                 Intent intent = new Intent(MainActivity.this, SignInScreen.class);
                 startActivity(intent);
-                finish(); // Finaliza a atividade atual para não permitir voltar com o botão de sistema
+                finish();
             }
         });
-
 
         if (currentUser != null) {
             emailTextView.setText("Welcome: " + currentUser.getEmail());
@@ -57,13 +56,9 @@ public class MainActivity extends AppCompatActivity {
             emailTextView.setText("Can't found email");
         }
 
-        //When I click on one or other icon
-        ImageView iconOpenGallery = findViewById(R.id.iconOpenGallery);
-        ImageView iconApplyFilter = findViewById(R.id.iconApplyFilter);
-        ImageView iconTakePhoto = findViewById(R.id.iconTakePhoto);
-
         findViewById(R.id.iconTakePhoto).setOnClickListener(v -> checkCameraPermission());
 
+        ImageView iconOpenGallery = findViewById(R.id.iconOpenGallery);
         //intent for open gallery
         iconOpenGallery.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -73,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        ImageView iconApplyFilter = findViewById(R.id.iconApplyFilter);
         // intent for Apply Filter
         iconApplyFilter.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        ImageView iconTakePhoto = findViewById(R.id.iconTakePhoto);
         //  intent for Take photo
         iconTakePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,6 +88,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onBackPressed() {
+       Intent intent = new Intent(MainActivity.this, SignInScreen.class);
+        startActivity(intent);
+        finish();
+    }
 
     private void checkCameraPermission() {
 
@@ -108,8 +111,6 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
         }
     }
-
-
 
 
     @Override
