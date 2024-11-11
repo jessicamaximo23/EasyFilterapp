@@ -7,6 +7,8 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 100;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private ImageView imageView;
+    private ImageButton buttonBack;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,8 +38,19 @@ public class MainActivity extends AppCompatActivity {
         FirebaseUser currentUser = auth.getCurrentUser();
         TextView emailTextView = findViewById(R.id.textViewEmail);
         imageView = findViewById(R.id.imageView);
+        ImageButton buttonBack = findViewById(R.id.buttonBack);
 
-    
+        buttonBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navegar para a tela de login
+                Intent intent = new Intent(MainActivity.this, SignInScreen.class);
+                startActivity(intent);
+                finish(); // Finaliza a atividade atual para não permitir voltar com o botão de sistema
+            }
+        });
+
+
         if (currentUser != null) {
             emailTextView.setText("Welcome: " + currentUser.getEmail());
         } else {
@@ -76,6 +90,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+
     private void checkCameraPermission() {
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)

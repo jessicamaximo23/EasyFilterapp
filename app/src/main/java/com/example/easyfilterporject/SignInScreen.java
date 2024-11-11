@@ -78,14 +78,14 @@ public class SignInScreen extends AppCompatActivity {
 
                                 finish();
                             } catch (Exception e) {
-                                Toast.makeText(SignInScreen.this, "Error opening Admin Panel: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(SignInScreen.this, "Error opening Admin Panel: " , Toast.LENGTH_SHORT).show();
                             }
                         } else {
                             Toast.makeText(SignInScreen.this, "User is null after login", Toast.LENGTH_SHORT).show();
                         }
 
                     } else {
-                        Toast.makeText(SignInScreen.this, "Try again: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SignInScreen.this, "Password or Email wrong" , Toast.LENGTH_SHORT).show();
                     }
                 });
     }
