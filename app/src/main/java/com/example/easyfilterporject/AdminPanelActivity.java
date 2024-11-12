@@ -107,7 +107,7 @@ public class AdminPanelActivity extends AppCompatActivity  {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
          if (currentUser != null && currentUser.getEmail().equals("jessicamaximo23@gmail.com")) {
-            // O administrador pode excluir qualquer usuário
+
             usersRef.child(userId).removeValue()
                     .addOnSuccessListener(aVoid ->
                             Toast.makeText(AdminPanelActivity.this, "User deleted from Database", Toast.LENGTH_SHORT).show()
@@ -144,7 +144,7 @@ public class AdminPanelActivity extends AppCompatActivity  {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         if (currentUser != null && currentUser.getEmail().equals("jessicamaximo23@gmail.com")) {
-            // O administrador pode editar o e-mail de qualquer usuário
+
             HashMap<String, Object> updates = new HashMap<>();
             updates.put("email", newEmail);
             usersRef.child(userId).updateChildren(updates)

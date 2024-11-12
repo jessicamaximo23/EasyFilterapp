@@ -28,8 +28,6 @@ public class GalleryActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_gallery);
         imageView = findViewById(R.id.imageView);
-
-        // Chama o método para abrir a galeria com seleção múltipla
         openGallery();
 
     }

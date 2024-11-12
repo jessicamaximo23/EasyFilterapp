@@ -56,4 +56,11 @@ dependencies {
     implementation ("com.google.firebase:firebase-auth:21.0.5")
     // Firebase Realtime Database
     implementation ("com.google.firebase:firebase-database:20.0.4")
+
+    //filter
+    implementation ("jp.co.cyberagent.android.gpuimage:gpuimage-library:2.1.0")
+
 }
+
+
+

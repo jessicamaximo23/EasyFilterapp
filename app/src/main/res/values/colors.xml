@@ -11,7 +11,7 @@
     <color name="primaryColor">#6200EE</color>
     <color name="primaryDarkColor">#3700B3</color>
     <color name="primaryLightColor">#BB86FC</color>
-    <color name="accentColor">#03DAC5</color>
+    <color name="accentColor">#03DAC5</color> 
 
     <color name="backgroundColor">#F5F5F5</color>
     <color name="surfaceColor">#FFFFFF</color>

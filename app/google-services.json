@@ -1,8 +1,9 @@
 {
   "project_info": {
     "project_number": "598145104744",
+    "firebase_url": "https://easyfilterproject-default-rtdb.firebaseio.com",
     "project_id": "easyfilterproject",
-    "storage_bucket": "easyfilterproject.appspot.com"
+    "storage_bucket": "easyfilterproject.firebasestorage.app"
   },
   "client": [
     {
