@@ -34,9 +34,6 @@ public class SignInScreen extends AppCompatActivity {
         signUpButton = findViewById(R.id.signUpButton);
         resetPasswordButton = findViewById(R.id.resetPasswordButton);
 
-//        textViewName = findViewById(R.id.textViewName);
-//        textViewEmail = findViewById(R.id.textViewEmail);
-
         signInButton.setOnClickListener(view -> signInUser());
 
         signUpButton.setOnClickListener(v -> {
@@ -44,7 +41,6 @@ public class SignInScreen extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // Redireciona para a tela de redefinição de senha
         resetPasswordButton.setOnClickListener(v -> {
             Intent intent = new Intent(SignInScreen.this, ResetScreen.class);
             startActivity(intent);
@@ -74,8 +70,6 @@ public class SignInScreen extends AppCompatActivity {
                             usersRef.get().addOnCompleteListener(task1 -> {
                                 if (task1.isSuccessful()) {
                                     if (task1.getResult().exists()) {
-
-
 
                                     }
                                 } else {

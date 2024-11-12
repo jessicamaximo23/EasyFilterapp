@@ -67,8 +67,11 @@ public class SignUpScreen extends AppCompatActivity {
                             usersRef.child(userId).setValue(newUser)
                                     .addOnSuccessListener(aVoid -> {
                                         Toast.makeText(SignUpScreen.this, "User registered successfully!", Toast.LENGTH_SHORT).show();
-                                        startActivity(new Intent(SignUpScreen.this, SignInScreen.class));
-                                        finish();
+
+                                        Intent intent = new Intent(SignUpScreen.this, MainActivity.class);
+                                        intent.putExtra("userName", username);
+                                        intent.putExtra("userEmail", email);
+                                        startActivity(intent);
                                     })
                                     .addOnFailureListener(e -> {
                                         Toast.makeText(SignUpScreen.this, "Failed to save user: " , Toast.LENGTH_SHORT).show();

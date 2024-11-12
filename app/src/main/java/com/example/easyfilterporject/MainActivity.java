@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private ImageView imageView;
     private ImageButton buttonBack;
-    private TextView textViewEmail, textViewName;
+    private TextView textViewName;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
 
         textViewName = findViewById(R.id.textViewName);
-        textViewEmail = findViewById(R.id.textViewEmail);
         imageView = findViewById(R.id.imageView);
         buttonBack = findViewById(R.id.buttonBack);
 
@@ -48,9 +47,13 @@ public class MainActivity extends AppCompatActivity {
         String name = getIntent().getStringExtra("userName");
         String email = getIntent().getStringExtra("userEmail");
 
-        // Define o texto nas TextViews
-        textViewName.setText("Welcome: " + name);
-        textViewEmail.setText("Email: " + email);
+        if (name != null && !name.isEmpty()) {
+            textViewName.setText("Welcome: " + name);
+        } else {
+            textViewName.setText("Welcome: " + email);
+        }
+
+
 
         buttonBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,19 +74,16 @@ public class MainActivity extends AppCompatActivity {
             usersRef.get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     if (task.getResult().exists()) {
-                        // Recupera o nome do usuário
-//                        String name = task.getResult().child("name").getValue(String.class);
-//                        String email = task.getResult().child("email").getValue(String.class);
 
-                        // Exibe o nome na TextView
-                        if (name != null && !name.isEmpty()) {
-                            textViewName.setText("Welcome: " + name);
+                        // Exibe o nome do usuário
+                        String nameFromDb = task.getResult().child("name").getValue(String.class);
+                        String emailFromDb = task.getResult().child("email").getValue(String.class);
+
+                        if (nameFromDb != null && !nameFromDb.isEmpty()) {
+                            textViewName.setText("Welcome, " + nameFromDb);
                         } else {
-                            textViewName.setText("Welcome: " + email); // Caso o nome não esteja disponível
+                            textViewName.setText("Welcome: " + emailFromDb);
                         }
-
-                        // Exibe o email na TextView
-                        textViewEmail.setText("Email: " + email);
                     } else {
                         Toast.makeText(MainActivity.this, "User data not found", Toast.LENGTH_SHORT).show();
                     }
