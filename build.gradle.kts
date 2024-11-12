@@ -5,4 +5,13 @@ plugins {
     // Aplica o plugin do Google Services no nível de projeto
     id("com.google.gms.google-services") version "4.4.2" apply false
 }
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        jcenter()  // Opcional
+        maven { url = uri("https://jitpack.io") }  // Adicionar jitpack
+    }
+}
+
 

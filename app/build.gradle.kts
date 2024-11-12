@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
-    id("com.google.gms.google-services")  // Aplica o plugin do Google Services aqui
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -61,6 +61,5 @@ dependencies {
     implementation ("jp.co.cyberagent.android.gpuimage:gpuimage-library:2.1.0")
 
 }
-
 
 
