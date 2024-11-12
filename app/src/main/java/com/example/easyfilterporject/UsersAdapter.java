@@ -35,6 +35,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
         User user = users.get(position);
+        holder.textViewName.setText(user.getName());
         holder.textViewUserEmail.setText(user.getEmail());
 
         holder.buttonEditUser.setOnClickListener(v -> onUserClickListener.onEditClick(user));
@@ -47,11 +48,12 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     }
 
     static class UserViewHolder extends RecyclerView.ViewHolder {
-        TextView textViewUserEmail;
+        TextView textViewName,textViewUserEmail;
         Button buttonEditUser,buttonDeleteUser;
 
         UserViewHolder(View itemView) {
             super(itemView);
+            textViewName = itemView.findViewById(R.id.textViewName);
             textViewUserEmail = itemView.findViewById(R.id.textViewUserEmail);
             buttonEditUser = itemView.findViewById(R.id.buttonEditUser);
             buttonDeleteUser = itemView.findViewById(R.id.buttonDeleteUser);

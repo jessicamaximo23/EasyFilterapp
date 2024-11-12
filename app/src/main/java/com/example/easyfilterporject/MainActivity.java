@@ -20,6 +20,8 @@ import androidx.core.content.ContextCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,16 +31,26 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private ImageView imageView;
     private ImageButton buttonBack;
+    private TextView textViewEmail, textViewName;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         auth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = auth.getCurrentUser();
-        TextView emailTextView = findViewById(R.id.textViewEmail);
+
+        textViewName = findViewById(R.id.textViewName);
+        textViewEmail = findViewById(R.id.textViewEmail);
         imageView = findViewById(R.id.imageView);
         buttonBack = findViewById(R.id.buttonBack);
+
+        // Recupera o nome e o email da Intent
+        String name = getIntent().getStringExtra("userName");
+        String email = getIntent().getStringExtra("userEmail");
+
+        // Define o texto nas TextViews
+        textViewName.setText("Welcome: " + name);
+        textViewEmail.setText("Email: " + email);
 
         buttonBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -50,10 +62,35 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
         if (currentUser != null) {
-            emailTextView.setText("Welcome: " + currentUser.getEmail());
-        } else {
-            emailTextView.setText("Can't found email");
+            String userId = currentUser.getUid();
+            DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+
+            usersRef.get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    if (task.getResult().exists()) {
+                        // Recupera o nome do usuário
+//                        String name = task.getResult().child("name").getValue(String.class);
+//                        String email = task.getResult().child("email").getValue(String.class);
+
+                        // Exibe o nome na TextView
+                        if (name != null && !name.isEmpty()) {
+                            textViewName.setText("Welcome: " + name);
+                        } else {
+                            textViewName.setText("Welcome: " + email); // Caso o nome não esteja disponível
+                        }
+
+                        // Exibe o email na TextView
+                        textViewEmail.setText("Email: " + email);
+                    } else {
+                        Toast.makeText(MainActivity.this, "User data not found", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(MainActivity.this, "Failed to load user data", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
 
         findViewById(R.id.iconTakePhoto).setOnClickListener(v -> checkCameraPermission());

@@ -2,17 +2,36 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:padding="10dp"
     android:gravity="center_vertical">
 
     <TextView
-        android:id="@+id/textViewUserEmail"
-        android:layout_width="0dp"
+        android:id="@+id/textViewName"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:text="Name"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:layout_marginEnd="16dp"/>
+
+    <TextView
+        android:id="@+id/textViewUserEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:text=""
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        android:textColor="@android:color/darker_gray"
+        android:ellipsize="end"
+        android:maxLines="1" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="10dp">
 
     <Button
         android:id="@+id/buttonEditUser"
@@ -27,4 +46,5 @@
         android:layout_height="wrap_content"
         android:text="Delete"
       />
+    </LinearLayout>
 </LinearLayout>

@@ -18,7 +18,7 @@ public class SignInScreen extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private EditText editTextEmail, editTextPassword;
-    private TextView resetPasswordButton, signUpButton ;
+    private TextView resetPasswordButton, signUpButton,textViewName, textViewEmail;;
     private Button signInButton;
 
     @Override
@@ -33,6 +33,9 @@ public class SignInScreen extends AppCompatActivity {
         signInButton = findViewById(R.id.cirLoginButton);
         signUpButton = findViewById(R.id.signUpButton);
         resetPasswordButton = findViewById(R.id.resetPasswordButton);
+
+//        textViewName = findViewById(R.id.textViewName);
+//        textViewEmail = findViewById(R.id.textViewEmail);
 
         signInButton.setOnClickListener(view -> signInUser());
 
@@ -68,26 +71,35 @@ public class SignInScreen extends AppCompatActivity {
 
                             DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users").child(user.getUid());
 
-                            // Bloco try-catch para abrir o AdminPanelActivity
+                            usersRef.get().addOnCompleteListener(task1 -> {
+                                if (task1.isSuccessful()) {
+                                    if (task1.getResult().exists()) {
+
+
+
+                                    }
+                                } else {
+                                    Toast.makeText(SignInScreen.this, "Failed to load user data", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+
                             try {
                                 if (email.equals("jessicamaximo23@gmail.com")) {
                                     startActivity(new Intent(SignInScreen.this, AdminPanelActivity.class));
                                 } else {
                                     startActivity(new Intent(SignInScreen.this, MainActivity.class));
                                 }
-
                                 finish();
                             } catch (Exception e) {
-                                Toast.makeText(SignInScreen.this, "Error opening Admin Panel: " , Toast.LENGTH_SHORT).show();
+                                Toast.makeText(SignInScreen.this, "Error opening Admin Panel: ", Toast.LENGTH_SHORT).show();
                             }
                         } else {
                             Toast.makeText(SignInScreen.this, "User is null after login", Toast.LENGTH_SHORT).show();
                         }
 
                     } else {
-                        Toast.makeText(SignInScreen.this, "Password or Email wrong" , Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SignInScreen.this, "Password or Email wrong", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
-
 }

@@ -20,7 +20,7 @@ import com.google.firebase.database.FirebaseDatabase;
 public class SignUpScreen extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
-    private EditText editTextEmail, editTextPassword;
+    private EditText editTextName,editTextEmail, editTextPassword;
     private Button cirRegisterButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,13 +30,13 @@ public class SignUpScreen extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
+        editTextName = findViewById(R.id.editTextUsername);
         editTextEmail = findViewById(R.id.editTextEmail);
         editTextPassword = findViewById(R.id.editTextPassword);
         cirRegisterButton = findViewById(R.id.cirRegisterButton);
@@ -44,11 +44,12 @@ public class SignUpScreen extends AppCompatActivity {
         cirRegisterButton.setOnClickListener(v -> createAccount());
     }
     private void createAccount() {
+        String username = editTextName.getText().toString().trim();
         String email = editTextEmail.getText().toString().trim();
         String password = editTextPassword.getText().toString().trim();
 
-        if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(SignUpScreen.this, "Please insert email and password", Toast.LENGTH_SHORT).show();
+        if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(SignUpScreen.this, "Please insert all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -61,7 +62,9 @@ public class SignUpScreen extends AppCompatActivity {
                             DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
                             String userId = user.getUid();
 
-                            usersRef.child(userId).setValue(new User(email))
+                            User newUser = new User(username, email);
+
+                            usersRef.child(userId).setValue(newUser)
                                     .addOnSuccessListener(aVoid -> {
                                         Toast.makeText(SignUpScreen.this, "User registered successfully!", Toast.LENGTH_SHORT).show();
                                         startActivity(new Intent(SignUpScreen.this, SignInScreen.class));
