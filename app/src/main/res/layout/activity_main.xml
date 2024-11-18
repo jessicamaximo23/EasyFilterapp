@@ -155,7 +155,7 @@
                         android:layout_width="50dp"
                         android:layout_height="50dp"
                         android:src="@drawable/ic_add_a_photo_"
-                        android:contentDescription="Tirar Foto"
+                        android:contentDescription="Take photo"
                         android:clickable="true"
                         android:focusable="true"
                         android:padding="10dp"
