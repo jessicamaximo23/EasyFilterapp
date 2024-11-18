@@ -16,6 +16,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -39,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imageView;
     private ImageButton buttonBack;
     private TextView textViewName;
+    private ActivityResultLauncher<String[]> activityResultLauncher;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,6 +61,26 @@ public class MainActivity extends AppCompatActivity {
         } else {
             textViewName.setText("Welcome: " + email);
         }
+
+        // Inicialize o launcher de permissões
+        activityResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestMultiplePermissions(), permissions -> {
+                    boolean permissionGranted = true;
+                    for (Boolean granted : permissions.values()) {
+                        if (!granted) {
+                            permissionGranted = false;
+                            break;
+                        }
+                    }
+
+                    if (!permissionGranted) {
+                        Toast.makeText(getBaseContext(), "Permission request denied", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // Permissões concedidas, iniciar a câmera
+                        startCamera();
+                    }
+                });
+
 
         buttonBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,9 +121,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         findViewById(R.id.iconTakePhoto).setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, OpenCameraActivity.class);
-            startActivity(intent);
+            // Verificar permissões de câmera
+            activityResultLauncher.launch(new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE});
         });
+
 
         findViewById(R.id.iconOpenGallery).setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -113,6 +137,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void startCamera() {
+        Intent intent = new Intent(MainActivity.this, OpenCameraActivity.class);
+        startActivity(intent);
+    }
 
 
     @Override
@@ -123,13 +151,6 @@ public class MainActivity extends AppCompatActivity {
 
         super.onBackPressed();
     }
-
-
-
-
-
-
-
 
 
     private void openAdminPanel(String email) {

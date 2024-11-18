@@ -65,5 +65,7 @@ dependencies {
     implementation ("jp.co.cyberagent.android:gpuimage:2.1.0")
     implementation ("androidx.constraintlayout:constraintlayout:2.1.4")
 
+
+
 }
 
