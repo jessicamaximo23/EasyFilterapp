@@ -1,11 +1,14 @@
 package com.example.easyfilterporject;
-mport android.Manifest;
+import android.Manifest;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -45,7 +48,7 @@ public class OpenCameraActivity extends AppCompatActivity {
     private ImageButton backButton;
     private ImageView thumbnailView;
     private Uri lastImageUri;
-    private boolean isFrontCamera = false;
+    private boolean isFrontCamera = false;  // Alternar entre câmera frontal e traseira
     private final Executor executor = Executors.newSingleThreadExecutor();
 
     @Override
@@ -53,39 +56,43 @@ public class OpenCameraActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_open_camera);
 
-        // Inicializar views
+        // Inicializa as views
         previewView = findViewById(R.id.preview_view);
         captureButton = findViewById(R.id.capture_button);
         switchCameraButton = findViewById(R.id.switch_camera);
         backButton = findViewById(R.id.back_button);
         thumbnailView = findViewById(R.id.thumbnail_view);
 
-        // Verificar permissão da câmera
+        // Verifica permissão da câmera e inicializa a câmera
         if (checkCameraPermission()) {
             startCamera();
         }
 
-        // Configurar listeners dos botões
+        // Configura os listeners dos botões
         setupButtonListeners();
     }
 
     private void setupButtonListeners() {
+        // Ao pressionar o botão de captura, tira a foto
         captureButton.setOnClickListener(v -> takePhoto());
 
+        // Alterna entre a câmera frontal e traseira
         switchCameraButton.setOnClickListener(v -> {
-            isFrontCamera = !isFrontCamera;
-            startCamera();
+            isFrontCamera = !isFrontCamera;  // Alterna a câmera
+            startCamera();  // Reinicia a câmera com a nova configuração
         });
 
+        // Volta para a tela anterior
         backButton.setOnClickListener(v -> {
             if (lastImageUri != null) {
                 Intent resultIntent = new Intent();
                 resultIntent.setData(lastImageUri);
                 setResult(RESULT_OK, resultIntent);
             }
-            finish();
+            finish();  // Fecha a activity
         });
 
+        // Mostra a imagem em miniatura quando pressionada
         thumbnailView.setOnClickListener(v -> {
             if (lastImageUri != null) {
                 Intent intent = new Intent(this, FilterActivity.class);
@@ -98,6 +105,7 @@ public class OpenCameraActivity extends AppCompatActivity {
     private boolean checkCameraPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
+            // Se a permissão não for concedida, solicita a permissão
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.CAMERA},
                     CAMERA_PERMISSION_REQUEST_CODE);
@@ -112,82 +120,84 @@ public class OpenCameraActivity extends AppCompatActivity {
 
         cameraProviderFuture.addListener(() -> {
             try {
+                // Obtém o provedor da câmera
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
 
-                // Configurar o preview
+                // Configura o preview da câmera
                 Preview preview = new Preview.Builder().build();
                 preview.setSurfaceProvider(previewView.getSurfaceProvider());
 
-                // Configurar a captura de imagem
+                // Configura a captura da imagem
                 imageCapture = new ImageCapture.Builder()
                         .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
                         .build();
 
-                // Selecionar câmera frontal ou traseira
+                // Configura a câmera frontal ou traseira
                 CameraSelector cameraSelector = new CameraSelector.Builder()
-                        .requireLensFacing(isFrontCamera ?
-                                CameraSelector.LENS_FACING_FRONT :
-                                CameraSelector.LENS_FACING_BACK)
+                        .requireLensFacing(isFrontCamera ? CameraSelector.LENS_FACING_FRONT : CameraSelector.LENS_FACING_BACK)
                         .build();
 
-                // Vincular casos de uso à câmera
-                cameraProvider.unbindAll();
-                Camera camera = cameraProvider.bindToLifecycle(this, cameraSelector,
-                        preview, imageCapture);
+                // Vincula os casos de uso à câmera
+                cameraProvider.unbindAll();  // Desvincula as câmeras anteriores
+                cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture);  // Vincula a nova configuração da câmera
 
             } catch (ExecutionException | InterruptedException e) {
-                Toast.makeText(this, "Error starting camera",
-                        Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Error starting camera", Toast.LENGTH_SHORT).show();
             }
-        }, ContextCompat.getMainExecutor(this));
+        }, ContextCompat.getMainExecutor(this));  // Executa no executor principal
     }
 
     private void takePhoto() {
         if (imageCapture == null) return;
 
-        // Criar arquivo para a foto
-        File photoFile = null;
+        // Cria um arquivo para armazenar a foto
+        File photoFile;
         try {
             photoFile = createImageFile();
         } catch (IOException e) {
-            Toast.makeText(this, "Error creating image file",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error creating image file", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Configurar o output da foto
-        ImageCapture.OutputFileOptions outputFileOptions =
-                new ImageCapture.OutputFileOptions.Builder(photoFile).build();
+        // Configura o arquivo de saída da imagem
+        ContentValues contentValues = new ContentValues();
+        String name = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US)
+                .format(System.currentTimeMillis());
+        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, name);
+        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
 
-        // Tirar a foto
-        imageCapture.takePicture(outputFileOptions, executor,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            contentValues.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/CameraX-Image");
+        }
+
+        // Cria um objeto de opções de arquivo de saída
+        ImageCapture.OutputFileOptions outputFileOptions =
+                new ImageCapture.OutputFileOptions.Builder(getContentResolver(),
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                        .build();
+
+        // Configura o ouvinte de captura da imagem
+        imageCapture.takePicture(outputFileOptions, ContextCompat.getMainExecutor(this),
                 new ImageCapture.OnImageSavedCallback() {
                     @Override
-                    public void onImageSaved(@NonNull ImageCapture.OutputFileResults output) {
-                        lastImageUri = FileProvider.getUriForFile(
-                                OpenCameraActivity.this,
-                                "com.example.easyfilterporject.fileprovider",
-                                photoFile);
-
-                        runOnUiThread(() -> {
-                            thumbnailView.setImageURI(lastImageUri);
-                            thumbnailView.setVisibility(View.VISIBLE);
-                            Toast.makeText(OpenCameraActivity.this,
-                                    "Image captured", Toast.LENGTH_SHORT).show();
-                        });
+                    public void onError(@NonNull ImageCaptureException exc) {
+                        Log.e("OpenCameraActivity", "Photo capture failed: " + exc.getMessage(), exc);
                     }
 
                     @Override
-                    public void onError(@NonNull ImageCaptureException e) {
-                        runOnUiThread(() -> Toast.makeText(OpenCameraActivity.this,
-                                "Error capturing image", Toast.LENGTH_SHORT).show());
+                    public void onImageSaved(@NonNull ImageCapture.OutputFileResults output) {
+                        lastImageUri = output.getSavedUri();
+                        runOnUiThread(() -> {
+                            thumbnailView.setImageURI(lastImageUri);
+                            thumbnailView.setVisibility(View.VISIBLE);
+                            Toast.makeText(OpenCameraActivity.this, "Image captured", Toast.LENGTH_SHORT).show();
+                        });
                     }
                 });
     }
 
     private File createImageFile() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss",
-                Locale.getDefault()).format(new Date());
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         return File.createTempFile(imageFileName, ".jpg", storageDir);
@@ -198,12 +208,10 @@ public class OpenCameraActivity extends AppCompatActivity {
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 &&
-                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startCamera();
             } else {
-                Toast.makeText(this, "Camera permission is required",
-                        Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Camera permission is required", Toast.LENGTH_SHORT).show();
                 finish();
             }
         }
