@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <paths xmlns:android="http://schemas.android.com/apk/res/android">
+        <external-path
+            android:name="my_images"
+            android:path="Android/data/com.example.easyfilterporject/files/Pictures/" />
+        <cache-path
+            android:name="my_cache_images"
+            android:path="/" />
+        <files-path
+            android:name="my_internal_images"
+            android:path="images/" />
+    </paths>
+</resources>

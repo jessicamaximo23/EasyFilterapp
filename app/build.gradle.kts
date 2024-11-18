@@ -56,7 +56,14 @@ dependencies {
     // Firebase Realtime Database
     implementation ("com.google.firebase:firebase-database:20.0.4")
 
-
+    implementation ("androidx.core:core-ktx:1.10.1")
+    implementation ("androidx.appcompat:appcompat:1.6.1")
+    implementation ("com.google.firebase:firebase-database:20.0.4")
+    implementation ("com.google.firebase:firebase-auth:21.0.5")
+    implementation ("com.google.firebase:firebase-firestore:24.0.0")
+    implementation ("com.google.firebase:firebase-analytics")
+    implementation ("jp.co.cyberagent.android:gpuimage:2.1.0")
+    implementation ("androidx.constraintlayout:constraintlayout:2.1.4")
 
 }
 
