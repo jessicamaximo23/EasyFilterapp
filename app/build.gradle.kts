@@ -65,7 +65,10 @@ dependencies {
     implementation ("jp.co.cyberagent.android:gpuimage:2.1.0")
     implementation ("androidx.constraintlayout:constraintlayout:2.1.4")
 
-
+    implementation ("androidx.camera:camera-core:1.3.0")
+    implementation ("androidx.camera:camera-lifecycle:1.3.0")
+    implementation ("androidx.camera:camera-view:1.3.0")
+    implementation ("androidx.camera:camera-extensions:1.3.0")
 
 }
 

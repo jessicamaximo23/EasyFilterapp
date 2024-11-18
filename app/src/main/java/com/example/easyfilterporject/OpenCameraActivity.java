@@ -1,4 +1,6 @@
 package com.example.easyfilterporject;
+import static android.content.ContentValues.TAG;
+
 import android.Manifest;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -40,6 +42,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class OpenCameraActivity extends AppCompatActivity {
+
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 100;
     private PreviewView previewView;
     private ImageCapture imageCapture;
@@ -114,39 +117,6 @@ public class OpenCameraActivity extends AppCompatActivity {
         return true;
     }
 
-    private void startCamera() {
-        ListenableFuture<ProcessCameraProvider> cameraProviderFuture =
-                ProcessCameraProvider.getInstance(this);
-
-        cameraProviderFuture.addListener(() -> {
-            try {
-                // Obtém o provedor da câmera
-                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
-
-                // Configura o preview da câmera
-                Preview preview = new Preview.Builder().build();
-                preview.setSurfaceProvider(previewView.getSurfaceProvider());
-
-                // Configura a captura da imagem
-                imageCapture = new ImageCapture.Builder()
-                        .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
-                        .build();
-
-                // Configura a câmera frontal ou traseira
-                CameraSelector cameraSelector = new CameraSelector.Builder()
-                        .requireLensFacing(isFrontCamera ? CameraSelector.LENS_FACING_FRONT : CameraSelector.LENS_FACING_BACK)
-                        .build();
-
-                // Vincula os casos de uso à câmera
-                cameraProvider.unbindAll();  // Desvincula as câmeras anteriores
-                cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture);  // Vincula a nova configuração da câmera
-
-            } catch (ExecutionException | InterruptedException e) {
-                Toast.makeText(this, "Error starting camera", Toast.LENGTH_SHORT).show();
-            }
-        }, ContextCompat.getMainExecutor(this));  // Executa no executor principal
-    }
-
     private void takePhoto() {
         if (imageCapture == null) return;
 
@@ -160,41 +130,30 @@ public class OpenCameraActivity extends AppCompatActivity {
         }
 
         // Configura o arquivo de saída da imagem
-        ContentValues contentValues = new ContentValues();
-        String name = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US)
-                .format(System.currentTimeMillis());
-        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, name);
-        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
+        ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(photoFile).build();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            contentValues.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/CameraX-Image");
-        }
+        // Captura a foto
+        imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback() {
+            @Override
+            public void onImageSaved(@NonNull ImageCapture.OutputFileResults output) {
+                lastImageUri = FileProvider.getUriForFile(OpenCameraActivity.this, "com.example.easyfilterporject.fileprovider", photoFile);
 
-        // Cria um objeto de opções de arquivo de saída
-        ImageCapture.OutputFileOptions outputFileOptions =
-                new ImageCapture.OutputFileOptions.Builder(getContentResolver(),
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-                        .build();
-
-        // Configura o ouvinte de captura da imagem
-        imageCapture.takePicture(outputFileOptions, ContextCompat.getMainExecutor(this),
-                new ImageCapture.OnImageSavedCallback() {
-                    @Override
-                    public void onError(@NonNull ImageCaptureException exc) {
-                        Log.e("OpenCameraActivity", "Photo capture failed: " + exc.getMessage(), exc);
-                    }
-
-                    @Override
-                    public void onImageSaved(@NonNull ImageCapture.OutputFileResults output) {
-                        lastImageUri = output.getSavedUri();
-                        runOnUiThread(() -> {
-                            thumbnailView.setImageURI(lastImageUri);
-                            thumbnailView.setVisibility(View.VISIBLE);
-                            Toast.makeText(OpenCameraActivity.this, "Image captured", Toast.LENGTH_SHORT).show();
-                        });
-                    }
+                // Exibe a miniatura da imagem capturada
+                runOnUiThread(() -> {
+                    thumbnailView.setImageURI(lastImageUri);
+                    thumbnailView.setVisibility(View.VISIBLE);
+                    Toast.makeText(OpenCameraActivity.this, "Image captured", Toast.LENGTH_SHORT).show();
                 });
+            }
+
+            @Override
+            public void onError(@NonNull ImageCaptureException e) {
+                runOnUiThread(() -> Toast.makeText(OpenCameraActivity.this, "Error capturing image", Toast.LENGTH_SHORT).show());
+            }
+        });
     }
+
+
 
     private File createImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
@@ -216,4 +175,41 @@ public class OpenCameraActivity extends AppCompatActivity {
             }
         }
     }
+
+    private void startCamera() {
+        ListenableFuture<ProcessCameraProvider> cameraProviderFuture =
+                ProcessCameraProvider.getInstance(this);
+
+        cameraProviderFuture.addListener(() -> {
+            try {
+                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
+
+                // Cria a pré-visualização
+                Preview preview = new Preview.Builder().build();
+                preview.setSurfaceProvider(previewView.getSurfaceProvider());
+
+                // Configura o seletor de câmera
+                CameraSelector cameraSelector = new CameraSelector.Builder()
+                        .requireLensFacing(isFrontCamera ?
+                                CameraSelector.LENS_FACING_FRONT :
+                                CameraSelector.LENS_FACING_BACK)
+                        .build();
+
+                // Configura o capturador de imagens
+                imageCapture = new ImageCapture.Builder().build();
+
+                // Vincula a câmera ao ciclo de vida
+                Camera camera = cameraProvider.bindToLifecycle(
+                        this,
+                        cameraSelector,
+                        preview,
+                        imageCapture
+                );
+
+            } catch (ExecutionException | InterruptedException e) {
+                Log.e(TAG, "Error initializing camera: " + e.getMessage());
+            }
+        }, ContextCompat.getMainExecutor(this));
+    }
+
 }
