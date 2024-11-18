@@ -1,5 +1,5 @@
 plugins {
-    id("com.android.application") version "8.1.2"
+    id("com.android.application")
     id("com.google.gms.google-services")
 }
 
@@ -56,9 +56,7 @@ dependencies {
     // Firebase Realtime Database
     implementation ("com.google.firebase:firebase-database:20.0.4")
 
-    //filter
-    implementation ("jp.co.cyberagent.android.gpuimage:gpuimage-library:2.1.0")
+
 
 }
-
 

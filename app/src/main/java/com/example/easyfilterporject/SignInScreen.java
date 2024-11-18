@@ -36,9 +36,9 @@ public class SignInScreen extends AppCompatActivity {
 
         TextView resetPasswordButton = findViewById(R.id.resetPasswordButton);
         if (resetPasswordButton != null) {
-            resetPasswordButton.setText("Texto alterado");
+            resetPasswordButton.setText("Forgot Password? Click here ");
         } else {
-            Log.e("SignInScreen", "TextView não encontrada!");
+            Log.e("SignInScreen", "!");
         }
 
 

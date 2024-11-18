@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -47,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
         imageView = findViewById(R.id.imageView);
         buttonBack = findViewById(R.id.buttonBack);
 
-        // Recupera o nome e o email da Intent
         String name = getIntent().getStringExtra("userName");
         String email = getIntent().getStringExtra("userEmail");
 
@@ -118,6 +118,13 @@ public class MainActivity extends AppCompatActivity {
         });
 
         ImageView iconTakePhoto = findViewById(R.id.iconTakePhoto);
+
+        findViewById(R.id.iconTakePhoto).setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                checkCameraPermission();
+            }
+        });
         //  intent for Take photo
         iconTakePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -157,18 +164,27 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK && data != null) {
-            Bitmap imageBitmap = (Bitmap) data.getExtras().get("data");
-            imageView.setImageBitmap(imageBitmap);
-        } else if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
-            // Imagem da galeria
-            Uri imageUri = data.getData(); // Obtém o URI da imagem
-            try {
-                Bitmap selectedImage = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
-                imageView.setImageBitmap(selectedImage); // Exibe a imagem no ImageView
-            } catch (IOException e) {
-                e.printStackTrace();
+
+        if (resultCode == RESULT_OK && data != null) {
+            if (requestCode == REQUEST_IMAGE_CAPTURE) {
+                // Captura de imagem
+                Bitmap imageBitmap = (Bitmap) data.getExtras().get("data");
+                imageView.setImageBitmap(imageBitmap);
+            } else if (requestCode == PICK_IMAGE_REQUEST) {
+                // Imagem da galeria
+                Uri imageUri = data.getData(); // Obtém o URI da imagem
+                try {
+                    // Tenta obter o Bitmap da URI
+                    Bitmap selectedImage = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+                    imageView.setImageBitmap(selectedImage); // Exibe a imagem no ImageView
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    // Adicione um feedback de erro para o usuário
+                }
             }
+        } else {
+            // Caso não haja um resultado válido
+            Log.e("GalleryActivity", "Erro ao obter a imagem.");
         }
 
 }

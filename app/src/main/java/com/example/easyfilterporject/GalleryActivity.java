@@ -8,13 +8,9 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.util.Log;
-import android.view.View;
+
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
@@ -68,14 +64,14 @@ public class GalleryActivity extends AppCompatActivity {
             if (data != null) {
                 Uri selectedImageUri = data.getData();
                 if (selectedImageUri != null) {
-                    // Crie um Bitmap da URI da imagem
+
                     Bitmap bitmap = getBitmapFromUri(selectedImageUri);
 
-                    // Crie um novo ImageView dinamicamente
+
                     ImageView imageView = new ImageView(this);
                     imageView.setImageBitmap(bitmap);
 
-                    // Adiciona a ImageView ao LinearLayout
+
                     imageContainer.addView(imageView);
                 }
             }
