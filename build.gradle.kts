@@ -1,17 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
-    alias(libs.plugins.android.application) apply false
-
-    // Aplica o plugin do Google Services no nível de projeto
-    id("com.google.gms.google-services") version "4.4.2" apply false
+    id("com.google.gms.google-services") version "4.3.15" apply false
+    id("com.android.library") version "8.1.2" apply false
+    id("com.android.application") version "8.1.2" apply false
 }
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        jcenter()  // Opcional
-        maven { url = uri("https://jitpack.io") }  // Adicionar jitpack
-    }
-}
-
 

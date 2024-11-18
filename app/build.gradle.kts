@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.android.application)
+    id("com.android.application") version "8.1.2"
     id("com.google.gms.google-services")
 }
 
@@ -43,10 +43,9 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-    // Importando o Firebase BoM para versões automáticas
+
     implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
 
-    // Adicionando SDKs do Firebase
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")

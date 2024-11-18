@@ -2,6 +2,7 @@ package com.example.easyfilterporject;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -18,7 +19,7 @@ public class SignInScreen extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private EditText editTextEmail, editTextPassword;
-    private TextView resetPasswordButton, signUpButton,textViewName, textViewEmail;;
+    private TextView resetPasswordButton, signUpButton;
     private Button signInButton;
 
     @Override
@@ -32,7 +33,14 @@ public class SignInScreen extends AppCompatActivity {
         editTextPassword = findViewById(R.id.editTextPassword);
         signInButton = findViewById(R.id.cirLoginButton);
         signUpButton = findViewById(R.id.signUpButton);
-        resetPasswordButton = findViewById(R.id.resetPasswordButton);
+
+        TextView resetPasswordButton = findViewById(R.id.resetPasswordButton);
+        if (resetPasswordButton != null) {
+            resetPasswordButton.setText("Texto alterado");
+        } else {
+            Log.e("SignInScreen", "TextView não encontrada!");
+        }
+
 
         signInButton.setOnClickListener(view -> signInUser());
 

@@ -132,6 +132,8 @@ public class MainActivity extends AppCompatActivity {
        Intent intent = new Intent(MainActivity.this, SignInScreen.class);
         startActivity(intent);
         finish();
+
+        super.onBackPressed();
     }
 
     private void checkCameraPermission() {
