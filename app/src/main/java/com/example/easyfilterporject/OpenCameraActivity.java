@@ -19,6 +19,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.core.AspectRatio;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageCapture;
@@ -46,10 +47,6 @@ public class OpenCameraActivity extends AppCompatActivity {
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 100;
     private PreviewView previewView;
     private ImageCapture imageCapture;
-    private ImageButton captureButton;
-    private ImageButton switchCameraButton;
-    private ImageButton backButton;
-    private ImageView thumbnailView;
     private Uri lastImageUri;
     private boolean isFrontCamera = false;  // Alternar entre câmera frontal e traseira
     private final Executor executor = Executors.newSingleThreadExecutor();
@@ -69,38 +66,10 @@ public class OpenCameraActivity extends AppCompatActivity {
         }
 
         // Configura os listeners dos botões
-        setupButtonListeners();
+
     }
 
-    private void setupButtonListeners() {
-        // Ao pressionar o botão de captura, tira a foto
-        captureButton.setOnClickListener(v -> takePhoto());
 
-        // Alterna entre a câmera frontal e traseira
-        switchCameraButton.setOnClickListener(v -> {
-            isFrontCamera = !isFrontCamera;  // Alterna a câmera
-            startCamera();  // Reinicia a câmera com a nova configuração
-        });
-
-        // Volta para a tela anterior
-        backButton.setOnClickListener(v -> {
-            if (lastImageUri != null) {
-                Intent resultIntent = new Intent();
-                resultIntent.setData(lastImageUri);
-                setResult(RESULT_OK, resultIntent);
-            }
-            finish();  // Fecha a activity
-        });
-
-        // Mostra a imagem em miniatura quando pressionada
-        thumbnailView.setOnClickListener(v -> {
-            if (lastImageUri != null) {
-                Intent intent = new Intent(this, FilterActivity.class);
-                intent.putExtra("imageUri", lastImageUri.toString());
-                startActivity(intent);
-            }
-        });
-    }
 
     private boolean checkCameraPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
@@ -137,8 +106,7 @@ public class OpenCameraActivity extends AppCompatActivity {
 
                 // Exibe a miniatura da imagem capturada
                 runOnUiThread(() -> {
-                    thumbnailView.setImageURI(lastImageUri);
-                    thumbnailView.setVisibility(View.VISIBLE);
+
                     Toast.makeText(OpenCameraActivity.this, "Image captured", Toast.LENGTH_SHORT).show();
                 });
             }
@@ -149,7 +117,6 @@ public class OpenCameraActivity extends AppCompatActivity {
             }
         });
     }
-
 
 
     private File createImageFile() throws IOException {
@@ -179,13 +146,16 @@ public class OpenCameraActivity extends AppCompatActivity {
 
         cameraProviderFuture.addListener(() -> {
             try {
+                // Obtém o CameraProvider
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
 
-                // Cria a pré-visualização
-                Preview preview = new Preview.Builder().build();
-                preview.setSurfaceProvider(previewView.getSurfaceProvider());
+                // Cria a pré-visualização com configurações
+                Preview preview = new Preview.Builder()
+                        .setTargetAspectRatio(AspectRatio.RATIO_4_3) // Ajusta para o aspecto desejado
+                        .setTargetRotation(getWindowManager().getDefaultDisplay().getRotation()) // Define a rotação
+                        .build();
 
-                // Configura o seletor de câmera
+                // Configura o seletor de câmera (frontal ou traseira)
                 CameraSelector cameraSelector = new CameraSelector.Builder()
                         .requireLensFacing(isFrontCamera ?
                                 CameraSelector.LENS_FACING_FRONT :
@@ -193,9 +163,13 @@ public class OpenCameraActivity extends AppCompatActivity {
                         .build();
 
                 // Configura o capturador de imagens
-                imageCapture = new ImageCapture.Builder().build();
+                imageCapture = new ImageCapture.Builder()
+                        .setTargetAspectRatio(AspectRatio.RATIO_4_3) // Ajusta para o mesmo aspecto do preview
+                        .setTargetRotation(getWindowManager().getDefaultDisplay().getRotation()) // Define a rotação
+                        .build();
 
-                // Vincula a câmera ao ciclo de vida
+                // Vincula a câmera ao ciclo de vida, ao Preview e ao ImageCapture
+                cameraProvider.unbindAll(); // Certifica-se de não haver vinculações anteriores
                 Camera camera = cameraProvider.bindToLifecycle(
                         this,
                         cameraSelector,
@@ -203,10 +177,12 @@ public class OpenCameraActivity extends AppCompatActivity {
                         imageCapture
                 );
 
+                // Fornece o surface provider para exibir a pré-visualização no PreviewView
+                preview.setSurfaceProvider(previewView.getSurfaceProvider());
+
             } catch (ExecutionException | InterruptedException e) {
                 Log.e(TAG, "Error initializing camera: " + e.getMessage());
             }
         }, ContextCompat.getMainExecutor(this));
     }
-
 }

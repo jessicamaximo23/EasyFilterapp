@@ -1,6 +1,7 @@
 package com.example.easyfilterporject;
 
 import android.Manifest;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -323,7 +324,16 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
             Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
         }
+        //notify gallery when the photo is finish
+        // Notifica a Galeria
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DATA, imageFile.getAbsolutePath());
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+        getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
     }
+
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
