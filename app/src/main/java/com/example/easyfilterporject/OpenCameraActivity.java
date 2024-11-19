@@ -5,6 +5,10 @@ import android.Manifest;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -50,6 +54,7 @@ public class OpenCameraActivity extends AppCompatActivity {
     private Uri lastImageUri;
     private boolean isFrontCamera = false;  // Alternar entre câmera frontal e traseira
     private final Executor executor = Executors.newSingleThreadExecutor();
+    private ImageView imageViewGallery;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,18 +63,13 @@ public class OpenCameraActivity extends AppCompatActivity {
 
         // Inicializa as views
         previewView = findViewById(R.id.preview_view);
-
+        imageViewGallery = findViewById(R.id.imageViewGallery);
 
         // Verifica permissão da câmera e inicializa a câmera
         if (checkCameraPermission()) {
             startCamera();
         }
-
-        // Configura os listeners dos botões
-
     }
-
-
 
     private boolean checkCameraPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
@@ -83,43 +83,99 @@ public class OpenCameraActivity extends AppCompatActivity {
         return true;
     }
 
-    private void takePhoto() {
-        if (imageCapture == null) return;
-
-        // Cria um arquivo para armazenar a foto
-        File photoFile;
-        try {
-            photoFile = createImageFile();
-        } catch (IOException e) {
-            Toast.makeText(this, "Error creating image file", Toast.LENGTH_SHORT).show();
+    private void capturePhoto() {
+        if (imageCapture == null) {
+            Toast.makeText(this, "ImageCapture is not initialized", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Configura o arquivo de saída da imagem
-        ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(photoFile).build();
+        // Obtem a rotação do dispositivo no momento
+        int rotation = getWindowManager().getDefaultDisplay().getRotation();
+        imageCapture.setTargetRotation(rotation);
+
+        // Cria o arquivo onde a imagem será salva
+        File photoFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+                "photo_" + System.currentTimeMillis() + ".jpg");
+
+        // Opções de saída para salvar a imagem
+        ImageCapture.OutputFileOptions outputOptions = new ImageCapture.OutputFileOptions.Builder(photoFile).build();
 
         // Captura a foto
-        imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback() {
-            @Override
-            public void onImageSaved(@NonNull ImageCapture.OutputFileResults output) {
-                lastImageUri = FileProvider.getUriForFile(OpenCameraActivity.this, "com.example.easyfilterporject.fileprovider", photoFile);
+        imageCapture.takePicture(
+                outputOptions,
+                ContextCompat.getMainExecutor(this),
+                new ImageCapture.OnImageSavedCallback() {
+                    @Override
+                    public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+                        Toast.makeText(OpenCameraActivity.this, "Photo saved: " + photoFile.getAbsolutePath(), Toast.LENGTH_SHORT).show();
 
-                // Exibe a miniatura da imagem capturada
-                runOnUiThread(() -> {
+                        // Atualiza a galeria com a imagem salva
+                        addPhotoToGallery(photoFile);
 
-                    Toast.makeText(OpenCameraActivity.this, "Image captured", Toast.LENGTH_SHORT).show();
-                });
-            }
+                        // Caso queira exibir a imagem capturada:
+                        displayCapturedPhoto(photoFile);
+                    }
 
-            @Override
-            public void onError(@NonNull ImageCaptureException e) {
-                runOnUiThread(() -> Toast.makeText(OpenCameraActivity.this, "Error capturing image", Toast.LENGTH_SHORT).show());
-            }
-        });
+                    @Override
+                    public void onError(@NonNull ImageCaptureException exception) {
+                        Toast.makeText(OpenCameraActivity.this, "Failed to capture photo: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+        );
     }
 
 
+    private void addPhotoToGallery(File photoFile) {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        Uri contentUri = Uri.fromFile(photoFile);
+        mediaScanIntent.setData(contentUri);
+        sendBroadcast(mediaScanIntent);
+    }
+
+    private void displayCapturedPhoto(File photoFile) {
+        Bitmap bitmap = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
+
+        // Corrige a rotação da imagem (se necessário)
+        Bitmap correctedBitmap = correctImageRotation(photoFile.getAbsolutePath());
+
+        // Exibe a imagem corrigida no ImageView
+        imageViewGallery.setImageBitmap(correctedBitmap);
+    }
+
+    private Bitmap correctImageRotation(String photoPath) {
+        Bitmap bitmap = BitmapFactory.decodeFile(photoPath);
+
+        try {
+            ExifInterface exif = new ExifInterface(photoPath);
+            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+
+            Matrix matrix = new Matrix();
+
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    matrix.postRotate(90);
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    matrix.postRotate(180);
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    matrix.postRotate(270);
+                    break;
+                default:
+                    break;
+            }
+
+            return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return bitmap; // Retorna o bitmap original se ocorrer um erro
+        }
+    }
+
     private File createImageFile() throws IOException {
+
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
