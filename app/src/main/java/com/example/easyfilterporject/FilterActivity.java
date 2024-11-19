@@ -2,6 +2,7 @@ package com.example.easyfilterporject;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -28,61 +29,70 @@ public class FilterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_filter);
 
+        // Inicialização dos elementos de UI
         filteredImageView = findViewById(R.id.filteredImageView);
         brightnessSeekBar = findViewById(R.id.brightnessSeekBar);
         contrastSeekBar = findViewById(R.id.contrastSeekBar);
         applyFilterButton = findViewById(R.id.applyFilterButton);
 
-        // Recupera a imagem original da intent
-        Bitmap originalBitmap = (Bitmap) getIntent().getParcelableExtra("originalBitmap");
+        // Recuperar o caminho da imagem
+        String imagePath = getIntent().getStringExtra("imagePath");
 
-        if (originalBitmap != null) {
-            gpuImage = new GPUImage(this);
-            gpuImage.setImage(originalBitmap);
-            filteredImageView.setImageBitmap(originalBitmap);
+        if (imagePath != null) {
+            // Tenta decodificar a imagem a partir do caminho
+            Bitmap originalBitmap = BitmapFactory.decodeFile(imagePath);
 
-            // Aplica o filtro inicial ao carregar a imagem
-            applyInitialFilters();
+            if (originalBitmap != null) {
+                // Configura a imagem com GPUImage
+                gpuImage = new GPUImage(this);
+                gpuImage.setImage(originalBitmap);
+                filteredImageView.setImageBitmap(originalBitmap);
 
-            // Define o listener para o botão de aplicar filtro
-            applyFilterButton.setOnClickListener(v -> applyFilters());
+                // Aplica filtros iniciais ao carregar a imagem
+                applyInitialFilters();
 
-            // Ajuste dinâmico de brilho
-            brightnessSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    applyFilters();
-                }
+                // Define o listener para o botão de aplicar filtro
+                applyFilterButton.setOnClickListener(v -> applyFilters());
 
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-                }
+                // Ajuste dinâmico de brilho
+                brightnessSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        applyFilters();
+                    }
 
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-                }
-            });
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {}
 
-            // Ajuste dinâmico de contraste
-            contrastSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    applyFilters();
-                }
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {}
+                });
 
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-                }
+                // Ajuste dinâmico de contraste
+                contrastSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        applyFilters();
+                    }
 
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-                }
-            });
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {}
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {}
+                });
+            } else {
+                // Caso a imagem não tenha sido carregada corretamente
+                Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show();
+                finish();
+            }
         } else {
-            Toast.makeText(this, "No image selected", Toast.LENGTH_SHORT).show();
+            // Caso o caminho da imagem não tenha sido passado
+            Toast.makeText(this, "Image path is missing", Toast.LENGTH_SHORT).show();
             finish();
         }
     }
+
     // Aplica filtros iniciais ao carregar a imagem
     private void applyInitialFilters() {
         if (gpuImage != null) {

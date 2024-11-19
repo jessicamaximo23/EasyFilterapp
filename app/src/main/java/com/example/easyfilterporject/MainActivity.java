@@ -164,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
                     if (allGranted) {
                         openCamera();
                     } else {
-                        Toast.makeText(this, "Permissões não concedidas", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Permissions not granted", Toast.LENGTH_SHORT).show();
                     }
                 }
         );
@@ -230,13 +230,24 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.iconApplyFilter).setOnClickListener(v -> {
             // Verificar se há uma imagem selecionada
             Drawable drawable = imageViewGallery.getDrawable();
-            if (drawable != null) {
+            if (drawable != null && drawable instanceof BitmapDrawable ) {
                 Bitmap originalBitmap = ((BitmapDrawable) drawable).getBitmap();
 
                 // Criar intent e passar bitmap
                 Intent intent = new Intent(MainActivity.this, FilterActivity.class);
-                intent.putExtra("originalBitmap", originalBitmap);
+
+                // Salvar o Bitmap em um arquivo temporário
+                File tempFile = new File(getCacheDir(), "temp_image.png");
+                try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+                    originalBitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                    fos.flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                intent.putExtra("imagePath", tempFile.getAbsolutePath());
                 filterLauncher.launch(intent);
+
             } else {
                 Toast.makeText(this, "Select Image First", Toast.LENGTH_SHORT).show();
             }
@@ -295,8 +306,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //Save photo after aplly filter
-
-
     private void saveImageToStorage(Bitmap bitmap) {
         if (!hasWritePermission()) {
             requestWritePermission();
@@ -332,8 +341,6 @@ public class MainActivity extends AppCompatActivity {
         getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
     }
-
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
