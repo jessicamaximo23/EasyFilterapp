@@ -108,18 +108,18 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
-        // Launcher para permissões de câmera
-//        cameraPermissionsLauncher = registerForActivityResult(
-//                new ActivityResultContracts.RequestMultiplePermissions(),
-//                result -> {
-//                    boolean allGranted = result.values().stream().allMatch(granted -> granted);
-//                    if (allGranted) {
-//                        openCamera();
-//                    } else {
-//                        Toast.makeText(this, "Permissões não concedidas", Toast.LENGTH_SHORT).show();
-//                    }
-//                }
-//        );
+//         Launcher para permissões de câmera
+        cameraPermissionsLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestMultiplePermissions(),
+                result -> {
+                    boolean allGranted = result.values().stream().allMatch(granted -> granted);
+                    if (allGranted) {
+                        openCamera();
+                    } else {
+                        Toast.makeText(this, "Permissões não concedidas", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
     }
 
     private void setupButtonBack() {

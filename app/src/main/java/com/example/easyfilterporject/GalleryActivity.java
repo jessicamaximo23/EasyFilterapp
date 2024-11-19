@@ -30,17 +30,7 @@ public class GalleryActivity extends AppCompatActivity {
         // Abre a galeria assim que a atividade for iniciada
         openGallery();
 
-        // Configura o clique para confirmar a imagem e voltar para a MainActivity
-        findViewById(R.id.btnConfirmImage).setOnClickListener(v -> {
-            if (selectedImageUri != null) {
-                Intent resultIntent = new Intent();
-                resultIntent.putExtra("selectedImageUri", selectedImageUri.toString()); // Passa o URI da imagem para a MainActivity
-                setResult(RESULT_OK, resultIntent); // Define o resultado OK para retornar à MainActivity
-                finish(); // Finaliza a GalleryActivity
-            } else {
-                Toast.makeText(this, "Nenhuma imagem selecionada", Toast.LENGTH_SHORT).show();
-            }
-        });
+
     }
 
     // Método para abrir a galeria
