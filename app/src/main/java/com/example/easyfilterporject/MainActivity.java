@@ -6,7 +6,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -15,10 +14,8 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -43,6 +40,19 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Inicializa o ImageView para exibir a imagem
+        imageViewGallery = findViewById(R.id.imageViewGallery);
+
+        // Recupera a URI da imagem passada pela GalleryActivity
+        String imageUriString = getIntent().getStringExtra("selectedImageUri");
+
+        if (imageUriString != null) {
+            Uri selectedImageUri = Uri.parse(imageUriString);
+
+            // Exibe a imagem na HomeActivity
+            imageViewGallery.setImageURI(selectedImageUri);
+        }
 
         // Inicializa os elementos da UI
         initUI();
@@ -99,17 +109,17 @@ public class MainActivity extends AppCompatActivity {
         );
 
         // Launcher para permissões de câmera
-        cameraPermissionsLauncher = registerForActivityResult(
-                new ActivityResultContracts.RequestMultiplePermissions(),
-                result -> {
-                    boolean allGranted = result.values().stream().allMatch(granted -> granted);
-                    if (allGranted) {
-                        openCamera();
-                    } else {
-                        Toast.makeText(this, "Permissões não concedidas", Toast.LENGTH_SHORT).show();
-                    }
-                }
-        );
+//        cameraPermissionsLauncher = registerForActivityResult(
+//                new ActivityResultContracts.RequestMultiplePermissions(),
+//                result -> {
+//                    boolean allGranted = result.values().stream().allMatch(granted -> granted);
+//                    if (allGranted) {
+//                        openCamera();
+//                    } else {
+//                        Toast.makeText(this, "Permissões não concedidas", Toast.LENGTH_SHORT).show();
+//                    }
+//                }
+//        );
     }
 
     private void setupButtonBack() {
@@ -191,10 +201,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // Se a galeria foi chamada
         if (requestCode == GALLERY_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             String selectedImageUriString = data.getStringExtra("selectedImageUri");
 

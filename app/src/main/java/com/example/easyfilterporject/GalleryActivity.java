@@ -59,14 +59,10 @@ public class GalleryActivity extends AppCompatActivity {
             selectedImageUri = data.getData(); // Recupera o URI da imagem selecionada
 
             if (selectedImageUri != null) {
-                try {
-                    // Converte o URI da imagem em Bitmap
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImageUri);
-                    imageViewGallery.setImageBitmap(bitmap); // Exibe a imagem na GalleryActivity
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Toast.makeText(this, "Erro ao carregar a imagem", Toast.LENGTH_SHORT).show();
-                }
+                // Cria um Intent para abrir a HomeActivity
+                Intent intent = new Intent(GalleryActivity.this, MainActivity.class);
+                intent.putExtra("selectedImageUri", selectedImageUri.toString()); // Passa a URI da imagem
+                startActivity(intent);
             }
         }
     }
