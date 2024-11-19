@@ -70,6 +70,7 @@ dependencies {
     implementation ("androidx.camera:camera-view:1.3.0")
     implementation ("androidx.camera:camera-extensions:1.3.0")
 
+    implementation ("jp.co.cyberagent.android:gpuimage:2.1.0")
 
 
 }

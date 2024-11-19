@@ -3,6 +3,8 @@ package com.example.easyfilterporject;
 import android.Manifest;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -32,7 +34,10 @@ public class MainActivity extends AppCompatActivity {
     private ActivityResultLauncher<String[]> permissionsLauncher;
     private ActivityResultLauncher<Intent> galleryLauncher;
     private ActivityResultLauncher<String[]> cameraPermissionsLauncher;
+
     private static final int GALLERY_REQUEST_CODE = 100;
+    private static final int FILTER_REQUEST_CODE = 1;  // Definindo o código da requisição
+
 
 
     @Override
@@ -179,8 +184,18 @@ public class MainActivity extends AppCompatActivity {
 
         // Ícone para aplicar filtro
         findViewById(R.id.iconApplyFilter).setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, FilterActivity.class);
-            startActivity(intent);
+            // Verificar se há uma imagem selecionada
+            Drawable drawable = imageViewGallery.getDrawable();
+            if (drawable != null) {
+                Bitmap originalBitmap = ((BitmapDrawable) drawable).getBitmap();
+
+                // Criar intent e passar bitmap
+                Intent intent = new Intent(MainActivity.this, FilterActivity.class);
+                intent.putExtra("originalBitmap", originalBitmap);
+                startActivityForResult(intent, FILTER_REQUEST_CODE);
+            } else {
+                Toast.makeText(this, "Select Image First", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
