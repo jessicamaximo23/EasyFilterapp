@@ -2,12 +2,15 @@ package com.example.easyfilterporject;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -16,13 +19,19 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
@@ -35,10 +44,14 @@ public class MainActivity extends AppCompatActivity {
     private ActivityResultLauncher<String[]> permissionsLauncher;
     private ActivityResultLauncher<Intent> galleryLauncher;
     private ActivityResultLauncher<String[]> cameraPermissionsLauncher;
+    private ActivityResultLauncher<Intent> filterLauncher;
+
 
     private static final int GALLERY_REQUEST_CODE = 100;
     private static final int FILTER_REQUEST_CODE = 1;  // Definindo o código da requisição
 
+    private static final int REQUEST_WRITE_STORAGE_PERMISSION = 1;
+    private Bitmap bitmapToSave; // Variável para armazenar o bitmap
 
 
     @Override
@@ -73,6 +86,23 @@ public class MainActivity extends AppCompatActivity {
 
         // Configura as ações de clique nos ícones
         setupIconListeners();
+
+        Button saveImageButton = findViewById(R.id.saveImageButton);
+        saveImageButton.setOnClickListener(v -> {
+            Bitmap bitmapToSave = ((BitmapDrawable) imageViewGallery.getDrawable()).getBitmap();
+            if (bitmapToSave != null) {
+                saveImageToStorage(bitmapToSave);
+            }
+        });
+
+    }
+
+    private boolean hasWritePermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestWritePermission() {
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_STORAGE_PERMISSION);
     }
 
     private void initUI() {
@@ -205,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
                 // Criar intent e passar bitmap
                 Intent intent = new Intent(MainActivity.this, FilterActivity.class);
                 intent.putExtra("originalBitmap", originalBitmap);
-                startActivityForResult(intent, FILTER_REQUEST_CODE);
+                filterLauncher.launch(intent);
             } else {
                 Toast.makeText(this, "Select Image First", Toast.LENGTH_SHORT).show();
             }
@@ -260,6 +290,52 @@ public class MainActivity extends AppCompatActivity {
         if ("jessicamaximo23@gmail.com".equals(email)) {
             Intent intent = new Intent(MainActivity.this, AdminPanelActivity.class);
             startActivity(intent);
+        }
+    }
+
+    //Save photo after aplly filter
+
+
+    private void saveImageToStorage(Bitmap bitmap) {
+        if (!hasWritePermission()) {
+            requestWritePermission();
+            return;
+        }
+
+        // Caminho do diretório onde as imagens serão salvas
+        File imagesDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "EasyFilter");
+        if (!imagesDir.exists()) {
+            imagesDir.mkdirs(); // Cria o diretório se não existir
+        }
+
+        // Nome do arquivo de imagem
+        String fileName = "filtered_image_" + System.currentTimeMillis() + ".png";
+        File imageFile = new File(imagesDir, fileName);
+
+        try (FileOutputStream fos = new FileOutputStream(imageFile)) {
+            // Comprime o bitmap e escreve no arquivo
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.flush();
+
+            // Notifica o usuário que a imagem foi salva
+            Toast.makeText(this, "Image saved successfully", Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == REQUEST_WRITE_STORAGE_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                saveImageToStorage(bitmapToSave);
+            } else {
+                Toast.makeText(this, "Permission denied to write to storage", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }
