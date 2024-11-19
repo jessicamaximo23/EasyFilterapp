@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -82,6 +83,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupLaunchers() {
+
+        ActivityResultLauncher<Intent> filterLauncher = registerForActivityResult(
+         new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null ) {
+                        Bitmap filteredBitmap = result.getData().getParcelableExtra("filteredBitmap");
+                        if (filteredBitmap != null) {
+                            imageViewGallery.setImageBitmap(filteredBitmap); // Atualiza a imagem filtrada
+                        }
+                    }
+                }
+);
         // Launcher para a galeria
         galleryLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -107,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
                     if (allGranted) {
                         openCamera();
                     } else {
-                        Toast.makeText(this, "Permissões necessárias não foram concedidas", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Required permissions were not granted", Toast.LENGTH_SHORT).show();
                     }
                 }
         );

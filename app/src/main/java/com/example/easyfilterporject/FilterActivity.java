@@ -23,7 +23,6 @@ public class FilterActivity extends AppCompatActivity {
     private GPUImage gpuImage;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,8 +32,6 @@ public class FilterActivity extends AppCompatActivity {
         brightnessSeekBar = findViewById(R.id.brightnessSeekBar);
         contrastSeekBar = findViewById(R.id.contrastSeekBar);
         applyFilterButton = findViewById(R.id.applyFilterButton);
-
-        filteredImageView = findViewById(R.id.filteredImageView);
 
         // Recupera a imagem original da intent
         Bitmap originalBitmap = (Bitmap) getIntent().getParcelableExtra("originalBitmap");
@@ -94,7 +91,7 @@ public class FilterActivity extends AppCompatActivity {
         }
     }
 
-    private void applyFilter(Bitmap originalImage) {
+    private void applyFilters() {
         if (gpuImage != null) {
             // Obtém o valor dos SeekBars
             float brightness = (brightnessSeekBar.getProgress() - 100) / 100.0f; // De -1 a 1
@@ -116,6 +113,7 @@ public class FilterActivity extends AppCompatActivity {
             Intent resultIntent = new Intent();
             resultIntent.putExtra("filteredBitmap", filteredBitmap);
             setResult(RESULT_OK, resultIntent);
+            finish();
         }
     }
 }
