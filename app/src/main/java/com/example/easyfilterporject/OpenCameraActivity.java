@@ -61,10 +61,7 @@ public class OpenCameraActivity extends AppCompatActivity {
 
         // Inicializa as views
         previewView = findViewById(R.id.preview_view);
-        captureButton = findViewById(R.id.capture_button);
-        switchCameraButton = findViewById(R.id.switch_camera);
-        backButton = findViewById(R.id.back_button);
-        thumbnailView = findViewById(R.id.thumbnail_view);
+
 
         // Verifica permissão da câmera e inicializa a câmera
         if (checkCameraPermission()) {
