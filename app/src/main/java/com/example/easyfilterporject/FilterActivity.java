@@ -89,7 +89,7 @@ public class FilterActivity extends AppCompatActivity {
                 contrastSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        applyFilters();
+                        updateBrightnessAndContrast();
                     }
 
                     @Override
@@ -98,8 +98,6 @@ public class FilterActivity extends AppCompatActivity {
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {}
                 });
-        applyFilterButton.setOnClickListener(v -> saveAndReturn());
-
         }
 
 
@@ -111,6 +109,7 @@ public class FilterActivity extends AppCompatActivity {
     }
 
     private void updateBrightnessAndContrast() {
+
         float brightness = (brightnessSeekBar.getProgress() - 100) / 100.0f;
         float contrast = contrastSeekBar.getProgress() / 100.0f;
 
@@ -121,6 +120,7 @@ public class FilterActivity extends AppCompatActivity {
         applyGPUFilter(filterGroup);
     }
 
+    //if the user want to reset the image
     private void resetToOriginal() {
         if (gpuImage != null) {
             gpuImage.setImage(originalBitmap);
@@ -152,5 +152,18 @@ public class FilterActivity extends AppCompatActivity {
             return null; // Implementar método.
         }
     }
+
+        private void applyGrayScaleFilter() {
+            // Implementar filtro de escala de cinza
+        }
+
+        private void applySepiaFilter() {
+            // Implementar filtro sépia
+        }
+
+        private void applyNegativeFilter() {
+            // Implementar filtro negativo
+        }
+
 
 }
