@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
         // Configura as ações de clique nos ícones
         setupIconListeners();
 
-        Button saveImageButton = findViewById(R.id.saveImageButton);
+        ImageView saveImageButton = findViewById(R.id.iconSavePhoto);
         saveImageButton.setOnClickListener(v -> {
             Bitmap bitmapToSave = ((BitmapDrawable) imageViewGallery.getDrawable()).getBitmap();
             if (bitmapToSave != null) {

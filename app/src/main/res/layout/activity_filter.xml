@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -16,7 +17,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Brilho"
+        android:text="brightness"
         android:textSize="18sp"
         android:layout_marginTop="16dp" />
 
@@ -31,7 +32,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Contraste"
+        android:text="Contrast"
         android:textSize="18sp"
         android:layout_marginTop="16dp" />
 
@@ -42,12 +43,66 @@
         android:max="200"
         android:progress="100" />
 
-    <!-- Botão para aplicar o filtro -->
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="150dp"
+        android:padding="16dp"
+        android:background="@color/white">
+
+
+        <HorizontalScrollView
+            android:id="@+id/filterScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="16dp"
+            android:padding="8dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <Button
+                    android:id="@+id/btnFilterGrayScale"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Gray Scale" />
+
+                <Button
+                    android:id="@+id/btnFilterSepia"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Sepia" />
+
+                <Button
+                    android:id="@+id/btnFilterNegative"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Negative" />
+
+                <Button
+                    android:id="@+id/btnFilterOriginal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Original" />
+                
+            </LinearLayout>
+        </HorizontalScrollView>
+
+    </RelativeLayout>
     <Button
         android:id="@+id/applyFilterButton"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Apply Filter"
-        android:layout_marginTop="24dp" />
+        android:layout_marginStart="8dp"/>
+
+
 
 </LinearLayout>
