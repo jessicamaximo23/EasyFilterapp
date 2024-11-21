@@ -10,16 +10,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import jp.co.cyberagent.android.gpuimage.GPUImage;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageBrightnessFilter;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageContrastFilter;
+import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilter;
+import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilterGroup;
+
 import android.widget.Button;
 import android.widget.Toast;
 
 public class FilterActivity extends AppCompatActivity {
 
     private ImageView filteredImageView;
-    private SeekBar brightnessSeekBar;
-    private SeekBar contrastSeekBar;
+    private SeekBar brightnessSeekBar, contrastSeekBar;
     private Button applyFilterButton;
-
     private Bitmap originalBitmap;
     private GPUImage gpuImage;
 
@@ -48,27 +49,34 @@ public class FilterActivity extends AppCompatActivity {
                 gpuImage.setImage(originalBitmap);
                 filteredImageView.setImageBitmap(originalBitmap);
 
-                // Aplica filtros iniciais ao carregar a imagem
-                applyInitialFilters();
 
                 // Define o listener para o botão de aplicar filtro
                 applyFilterButton.setOnClickListener(v -> applyFilters());
 
-                // Ajuste dinâmico de brilho
-                brightnessSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                    @Override
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        applyFilters();
-                    }
+            }
+        }
 
-                    @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) {}
 
-                    @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {}
-                });
+        // Configurar botões de filtro
+        findViewById(R.id.btnFilterGrayScale).setOnClickListener(v -> applyGrayScaleFilter());
+        findViewById(R.id.btnFilterSepia).setOnClickListener(v -> applySepiaFilter());
+        findViewById(R.id.btnFilterNegative).setOnClickListener(v -> applyNegativeFilter());
+        findViewById(R.id.btnFilterOriginal).setOnClickListener(v -> resetToOriginal());
 
-                // Ajuste dinâmico de contraste
+        // Ajustes de Brilho e Contraste
+        brightnessSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                updateBrightnessAndContrast();
+            }
+
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+        // Ajuste dinâmico de contraste
                 contrastSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -81,49 +89,48 @@ public class FilterActivity extends AppCompatActivity {
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {}
                 });
-            } else {
-                // Caso a imagem não tenha sido carregada corretamente
-                Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show();
-                finish();
-            }
-        } else {
-            // Caso o caminho da imagem não tenha sido passado
-            Toast.makeText(this, "Image path is missing", Toast.LENGTH_SHORT).show();
-            finish();
+        applyFilterButton.setOnClickListener(v -> saveAndReturn());
+
+        }
+
+
+    private void applyGPUFilter(GPUImageFilter filter) {
+        if (gpuImage != null) {
+            gpuImage.setFilter(filter);
+            filteredImageView.setImageBitmap(gpuImage.getBitmapWithFilterApplied());
         }
     }
 
-    // Aplica filtros iniciais ao carregar a imagem
-    private void applyInitialFilters() {
+    private void updateBrightnessAndContrast() {
+        float brightness = (brightnessSeekBar.getProgress() - 100) / 100.0f;
+        float contrast = contrastSeekBar.getProgress() / 100.0f;
+
+        GPUImageFilterGroup filterGroup = new GPUImageFilterGroup();
+        filterGroup.addFilter(new GPUImageBrightnessFilter(brightness));
+        filterGroup.addFilter(new GPUImageContrastFilter(contrast));
+
+        applyGPUFilter(filterGroup);
+    }
+
+    private void resetToOriginal() {
         if (gpuImage != null) {
-            // Aplicando filtro de brilho e contraste padrão
-            applyFilters();
+            gpuImage.setImage(originalBitmap);
+            filteredImageView.setImageBitmap(originalBitmap);
         }
     }
 
-    private void applyFilters() {
+    private void saveAndReturn() {
         if (gpuImage != null) {
-            // Obtém o valor dos SeekBars
-            float brightness = (brightnessSeekBar.getProgress() - 100) / 100.0f; // De -1 a 1
-            float contrast = contrastSeekBar.getProgress() / 100.0f; // De 0 a 2
-
-            // Aplicando filtro de brilho
-            GPUImageBrightnessFilter brightnessFilter = new GPUImageBrightnessFilter(brightness);
-            gpuImage.setFilter(brightnessFilter);
-
-            // Aplicando filtro de contraste
-            GPUImageContrastFilter contrastFilter = new GPUImageContrastFilter(contrast);
-            gpuImage.setFilter(contrastFilter);
-
-            // Aplicando a imagem filtrada
-            Bitmap filteredBitmap = gpuImage.getBitmapWithFilterApplied();
-            filteredImageView.setImageBitmap(filteredBitmap);
-
-            // Enviar a imagem filtrada de volta para a MainActivity
+            Bitmap resultBitmap = gpuImage.getBitmapWithFilterApplied();
             Intent resultIntent = new Intent();
-            resultIntent.putExtra("filteredBitmap", filteredBitmap);
+            resultIntent.putExtra("filteredBitmapPath", saveBitmapToCache(resultBitmap));
             setResult(RESULT_OK, resultIntent);
             finish();
         }
+    }
+
+    private String saveBitmapToCache(Bitmap bitmap) {
+        // Código para salvar o bitmap e retornar o caminho.
+        return null; // Implementar método.
     }
 }

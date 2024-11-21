@@ -91,18 +91,18 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:text="Original" />
-                
+
             </LinearLayout>
         </HorizontalScrollView>
-
     </RelativeLayout>
+
     <Button
         android:id="@+id/applyFilterButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Apply Filter"
-        android:layout_marginStart="8dp"/>
-
+        android:layout_marginStart="150dp"
+        android:gravity="center"/>
 
 
 </LinearLayout>
