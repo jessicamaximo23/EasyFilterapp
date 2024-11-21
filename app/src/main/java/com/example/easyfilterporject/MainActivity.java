@@ -22,6 +22,7 @@ import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -62,6 +63,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Inicializa o ImageView para exibir a imagem
         imageViewGallery = findViewById(R.id.imageViewGallery);
+
+
+
 
         // Recupera a URI da imagem passada pela GalleryActivity
         String imageUriString = getIntent().getStringExtra("selectedImageUri");
@@ -115,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupLaunchers() {
 
-        ActivityResultLauncher<Intent> filterLauncher = registerForActivityResult(
+        filterLauncher = registerForActivityResult(
          new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null ) {
@@ -231,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
             // Verificar se há uma imagem selecionada
             Drawable drawable = imageViewGallery.getDrawable();
             if (drawable != null && drawable instanceof BitmapDrawable ) {
+
                 Bitmap originalBitmap = ((BitmapDrawable) drawable).getBitmap();
 
                 // Criar intent e passar bitmap
