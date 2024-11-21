@@ -16,6 +16,10 @@ import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilterGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 public class FilterActivity extends AppCompatActivity {
 
     private ImageView filteredImageView;
@@ -41,20 +45,25 @@ public class FilterActivity extends AppCompatActivity {
 
         if (imagePath != null) {
             // Tenta decodificar a imagem a partir do caminho
-            Bitmap originalBitmap = BitmapFactory.decodeFile(imagePath);
-
-            if (originalBitmap != null) {
-                // Configura a imagem com GPUImage
-                gpuImage = new GPUImage(this);
-                gpuImage.setImage(originalBitmap);
-                filteredImageView.setImageBitmap(originalBitmap);
+            originalBitmap = BitmapFactory.decodeFile(imagePath);
 
 
-                // Define o listener para o botão de aplicar filtro
-                applyFilterButton.setOnClickListener(v -> applyFilters());
+            if (originalBitmap == null) {
+                Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show();
+                finish();
+                return;
 
             }
-        }
+            gpuImage = new GPUImage(this);
+            gpuImage.setImage(originalBitmap);
+            filteredImageView.setImageBitmap(originalBitmap);
+
+            applyFilterButton.setOnClickListener(v -> saveAndReturn());
+            } else {
+            // Caso o caminho seja nulo, informa o usuário e fecha a Activity
+            Toast.makeText(this, "Image path is missing", Toast.LENGTH_SHORT).show();
+            finish();
+            }
 
 
         // Configurar botões de filtro
@@ -130,7 +139,18 @@ public class FilterActivity extends AppCompatActivity {
     }
 
     private String saveBitmapToCache(Bitmap bitmap) {
-        // Código para salvar o bitmap e retornar o caminho.
-        return null; // Implementar método.
+
+        try {
+            File cacheDir = getCacheDir();
+            File file = new File(cacheDir, "filtered_image.png");
+            FileOutputStream outputStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.close();
+            return file.getAbsolutePath();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null; // Implementar método.
+        }
     }
+
 }
