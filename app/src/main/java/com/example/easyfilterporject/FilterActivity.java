@@ -9,9 +9,12 @@ import android.widget.SeekBar;
 import androidx.appcompat.app.AppCompatActivity;
 import jp.co.cyberagent.android.gpuimage.GPUImage;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageBrightnessFilter;
+import jp.co.cyberagent.android.gpuimage.filter.GPUImageColorInvertFilter;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageContrastFilter;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilter;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilterGroup;
+import jp.co.cyberagent.android.gpuimage.filter.GPUImageGrayscaleFilter;
+import jp.co.cyberagent.android.gpuimage.filter.GPUImageSepiaToneFilter;
 
 import android.widget.Button;
 import android.widget.Toast;
@@ -59,11 +62,11 @@ public class FilterActivity extends AppCompatActivity {
             filteredImageView.setImageBitmap(originalBitmap);
 
             applyFilterButton.setOnClickListener(v -> saveAndReturn());
-            } else {
+        } else {
             // Caso o caminho seja nulo, informa o usuário e fecha a Activity
             Toast.makeText(this, "Image path is missing", Toast.LENGTH_SHORT).show();
             finish();
-            }
+        }
 
 
         // Configurar botões de filtro
@@ -81,24 +84,29 @@ public class FilterActivity extends AppCompatActivity {
 
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
         });
         // Ajuste dinâmico de contraste
-                contrastSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                    @Override
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        updateBrightnessAndContrast();
-                    }
+        contrastSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                updateBrightnessAndContrast();
+            }
 
-                    @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
 
-                    @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {}
-                });
-        }
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+    }
 
 
     private void applyGPUFilter(GPUImageFilter filter) {
@@ -117,7 +125,10 @@ public class FilterActivity extends AppCompatActivity {
         filterGroup.addFilter(new GPUImageBrightnessFilter(brightness));
         filterGroup.addFilter(new GPUImageContrastFilter(contrast));
 
-        applyGPUFilter(filterGroup);
+        if (gpuImage != null) {
+            gpuImage.setFilter(filterGroup);
+            filteredImageView.setImageBitmap(gpuImage.getBitmapWithFilterApplied());
+        }
     }
 
     //if the user want to reset the image
@@ -153,17 +164,29 @@ public class FilterActivity extends AppCompatActivity {
         }
     }
 
-        private void applyGrayScaleFilter() {
-            // Implementar filtro de escala de cinza
+    private void applyGrayScaleFilter() {
+
+        if (gpuImage != null) {
+            gpuImage.setFilter(new GPUImageGrayscaleFilter());
+            filteredImageView.setImageBitmap(gpuImage.getBitmapWithFilterApplied());
+        }
+    }
+
+    private void applySepiaFilter() {
+
+        if (gpuImage != null) {
+            gpuImage.setFilter(new GPUImageSepiaToneFilter());
+            filteredImageView.setImageBitmap(gpuImage.getBitmapWithFilterApplied());
+        }
+    }
+
+    private void applyNegativeFilter() {
+
+        if (gpuImage != null) {
+            gpuImage.setFilter(new GPUImageColorInvertFilter());
+            filteredImageView.setImageBitmap(gpuImage.getBitmapWithFilterApplied());
         }
 
-        private void applySepiaFilter() {
-            // Implementar filtro sépia
-        }
 
-        private void applyNegativeFilter() {
-            // Implementar filtro negativo
-        }
-
-
+    }
 }
