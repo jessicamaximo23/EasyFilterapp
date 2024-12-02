@@ -139,11 +139,13 @@ public class FilterActivity extends AppCompatActivity {
     }
 
     private void saveAndReturn() {
+
         if (gpuImage != null) {
             Bitmap resultBitmap = gpuImage.getBitmapWithFilterApplied();
             Intent resultIntent = new Intent();
             resultIntent.putExtra("filteredBitmapPath", saveBitmapToCache(resultBitmap));
             setResult(RESULT_OK, resultIntent);
+
             finish();
         }
     }

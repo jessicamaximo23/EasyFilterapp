@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -50,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private static final int GALLERY_REQUEST_CODE = 100;
-    private static final int FILTER_REQUEST_CODE = 1;  // Definindo o código da requisição
+    private static final int  REQUEST_CODE_FILTER = 2;
 
     private static final int REQUEST_WRITE_STORAGE_PERMISSION = 1;
     private Bitmap bitmapToSave; // Variável para armazenar o bitmap
@@ -63,9 +64,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Inicializa o ImageView para exibir a imagem
         imageViewGallery = findViewById(R.id.imageViewGallery);
-
-
-
 
         // Recupera a URI da imagem passada pela GalleryActivity
         String imageUriString = getIntent().getStringExtra("selectedImageUri");
@@ -278,20 +276,22 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == GALLERY_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
-            String selectedImageUriString = data.getStringExtra("selectedImageUri");
+        if (requestCode == REQUEST_CODE_FILTER && resultCode == RESULT_OK && data != null) {
+            String filteredImagePath = data.getStringExtra("filteredBitmapPath");
 
-            if (selectedImageUriString != null) {
-                Uri selectedImageUri = Uri.parse(selectedImageUriString);
-                loadImage(selectedImageUri);
+            if (filteredImagePath != null) {
+                // Decodificar o bitmap a partir do caminho do arquivo
+                Bitmap filteredBitmap = BitmapFactory.decodeFile(filteredImagePath);
+
+                if (filteredBitmap != null) {
+                    ImageView imageViewGallery = findViewById(R.id.imageViewGallery); // Atualize para o ID correto
+                    imageViewGallery.setImageBitmap(filteredBitmap); // Atualiza o ImageView com a imagem filtrada
+                } else {
+                    Toast.makeText(this, "Failed to load the filtered image.", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(this, "No filtered image received.", Toast.LENGTH_SHORT).show();
             }
-        }
-
-        // Se a câmera foi chamada
-        if (requestCode == 1 && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
-            imageViewGallery.setImageBitmap(imageBitmap); // Exibe a foto capturada
         }
     }
 
