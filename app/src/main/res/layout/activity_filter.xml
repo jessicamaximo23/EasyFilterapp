@@ -44,57 +44,6 @@
         android:max="200"
         android:progress="100" />
 
-
-    <!-- Barra de Filtros rolável -->
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="8dp">
-
-            <Button
-                android:id="@+id/btnFilterGrayScale"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Gray Scale" />
-
-            <Button
-                android:id="@+id/btnFilterSepia"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="Sepia" />
-
-            <Button
-                android:id="@+id/btnFilterNegative"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="Negative" />
-
-            <Button
-                android:id="@+id/btnFilterOriginal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="Original" />
-
-            <Button
-                android:id="@+id/applyFilterButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Apply Filter"
-                android:layout_marginTop="10dp"
-                android:gravity="center"
-                android:backgroundTint="#FFC107" />
-        </LinearLayout>
-    </ScrollView>
-
     <!-- Barra de navegação fixa -->
     <LinearLayout
         android:id="@+id/navigationBar"
@@ -187,5 +136,51 @@
                 android:layout_marginTop="4dp"
                 android:gravity="center" />
         </LinearLayout>
+    </LinearLayout>
+
+    <!-- LinearLayout dos filtros que estará inicialmente invisível -->
+    <LinearLayout
+        android:id="@+id/filterButtonsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:visibility="gone">  <!-- Inicialmente invisível -->
+
+        <Button
+            android:id="@+id/btnFilterGrayScale"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Gray Scale" />
+
+        <Button
+            android:id="@+id/btnFilterSepia"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Sepia" />
+
+        <Button
+            android:id="@+id/btnFilterNegative"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Negative" />
+
+        <Button
+            android:id="@+id/btnFilterOriginal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Original" />
+
+        <Button
+            android:id="@+id/applyFilterButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="#FFC107"
+            android:gravity="center"
+            android:text="Apply Filter" />
     </LinearLayout>
 </LinearLayout>
