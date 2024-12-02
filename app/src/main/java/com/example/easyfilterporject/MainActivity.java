@@ -5,25 +5,19 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -43,69 +37,30 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imageViewGallery;
     private ImageButton buttonBack;
     private TextView textViewName;
-
-    private ActivityResultLauncher<String[]> permissionsLauncher;
+    private Bitmap capturedImageBitmap;
     private ActivityResultLauncher<Intent> galleryLauncher;
     private ActivityResultLauncher<String[]> cameraPermissionsLauncher;
-    private ActivityResultLauncher<Intent> filterLauncher;
-
-
-    private static final int GALLERY_REQUEST_CODE = 100;
-    private static final int  REQUEST_CODE_FILTER = 2;
-
-    private static final int REQUEST_WRITE_STORAGE_PERMISSION = 1;
-    private Bitmap bitmapToSave; // Variável para armazenar o bitmap
-
+    private ActivityResultLauncher<Intent> cameraLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Inicializa o ImageView para exibir a imagem
-        imageViewGallery = findViewById(R.id.imageViewGallery);
-
-        // Recupera a URI da imagem passada pela GalleryActivity
-        String imageUriString = getIntent().getStringExtra("selectedImageUri");
-
-        if (imageUriString != null) {
-            Uri selectedImageUri = Uri.parse(imageUriString);
-
-            // Exibe a imagem na HomeActivity
-            imageViewGallery.setImageURI(selectedImageUri);
-        }
-
         // Inicializa os elementos da UI
         initUI();
 
-        // Configura os Launchers de permissões e galeria
+        // Configura os Launchers de permissões e atividades
         setupLaunchers();
 
-        // Configura o comportamento do botão de voltar
-        setupButtonBack();
-
-        // Configura a exibição dos dados do usuário
-        setupUser();
-
-        // Configura as ações de clique nos ícones
+        // Configura os ícones e interações
         setupIconListeners();
 
-        ImageView saveImageButton = findViewById(R.id.iconSavePhoto);
-        saveImageButton.setOnClickListener(v -> {
-            Bitmap bitmapToSave = ((BitmapDrawable) imageViewGallery.getDrawable()).getBitmap();
-            if (bitmapToSave != null) {
-                saveImageToStorage(bitmapToSave);
-            }
-        });
+        // Configura o botão de voltar
+        setupButtonBack();
 
-    }
-
-    private boolean hasWritePermission() {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private void requestWritePermission() {
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_STORAGE_PERMISSION);
+        // Configura o nome do usuário
+        setupUser();
     }
 
     private void initUI() {
@@ -116,19 +71,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupLaunchers() {
-
-        filterLauncher = registerForActivityResult(
-         new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == RESULT_OK && result.getData() != null ) {
-                        Bitmap filteredBitmap = result.getData().getParcelableExtra("filteredBitmap");
-                        if (filteredBitmap != null) {
-                            imageViewGallery.setImageBitmap(filteredBitmap); // Atualiza a imagem filtrada
-                        }
-                    }
-                }
-);
-        // Launcher para a galeria
         galleryLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -139,26 +81,6 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
-        // Launcher para permissões
-        permissionsLauncher = registerForActivityResult(
-                new ActivityResultContracts.RequestMultiplePermissions(),
-                permissions -> {
-                    boolean allGranted = true;
-                    for (boolean granted : permissions.values()) {
-                        if (!granted) {
-                            allGranted = false;
-                            break;
-                        }
-                    }
-                    if (allGranted) {
-                        openCamera();
-                    } else {
-                        Toast.makeText(this, "Required permissions were not granted", Toast.LENGTH_SHORT).show();
-                    }
-                }
-        );
-
-//         Launcher para permissões de câmera
         cameraPermissionsLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestMultiplePermissions(),
                 result -> {
@@ -166,10 +88,48 @@ public class MainActivity extends AppCompatActivity {
                     if (allGranted) {
                         openCamera();
                     } else {
-                        Toast.makeText(this, "Permissions not granted", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Camera permissions not granted", Toast.LENGTH_SHORT).show();
                     }
                 }
         );
+
+        cameraLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        Bitmap photo = (Bitmap) result.getData().getExtras().get("data");
+                        if (photo != null) {
+                            capturedImageBitmap = photo;
+                            imageViewGallery.setImageBitmap(photo); // Exibe a foto tirada
+                        }
+                    }
+                }
+        );
+    }
+
+    private void setupIconListeners() {
+        // Ícone para abrir a câmera
+        findViewById(R.id.iconTakePhoto).setOnClickListener(v ->
+                cameraPermissionsLauncher.launch(new String[]{Manifest.permission.CAMERA}));
+
+        // Ícone para abrir a galeria
+        findViewById(R.id.iconOpenGallery).setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            galleryLauncher.launch(intent); // Abre a galeria
+        });
+
+        // Ícone para aplicar filtro
+        findViewById(R.id.iconApplyFilter).setOnClickListener(v -> {
+            if (capturedImageBitmap != null) {
+                Intent intent = new Intent(MainActivity.this, FilterActivity.class);
+                // Salva a imagem capturada para uso no filtro
+                File tempFile = saveBitmapToFile(capturedImageBitmap);
+                intent.putExtra("imagePath", tempFile.getAbsolutePath());
+                startActivity(intent);
+            } else {
+                Toast.makeText(this, "Capture or select an image first", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void setupButtonBack() {
@@ -181,183 +141,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupUser() {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseUser currentUser = auth.getCurrentUser();
         if (currentUser != null) {
-            String userId = currentUser.getUid();
-            DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
-
-            usersRef.get().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    if (task.getResult().exists()) {
-                        String nameFromDb = task.getResult().child("name").getValue(String.class);
-                        String emailFromDb = task.getResult().child("email").getValue(String.class);
-
-                        if (nameFromDb != null && !nameFromDb.isEmpty()) {
-                            textViewName.setText("Welcome, " + nameFromDb);
-                        } else {
-                            textViewName.setText("Welcome: " + emailFromDb);
-                        }
-                    } else {
-                        Toast.makeText(MainActivity.this, "User data not found", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Toast.makeText(MainActivity.this, "Failed to load user data", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-
-        String name = getIntent().getStringExtra("userName");
-        String email = getIntent().getStringExtra("userEmail");
-
-        if (name != null && !name.isEmpty()) {
-            textViewName.setText("Welcome: " + name);
+            textViewName.setText("Welcome, " + currentUser.getEmail());
         } else {
-            textViewName.setText("Welcome: " + email);
+            textViewName.setText("Welcome, Guest");
         }
-    }
-
-    private void setupIconListeners() {
-        // Ícone para tirar foto
-        findViewById(R.id.iconTakePhoto).setOnClickListener(v ->
-                cameraPermissionsLauncher.launch(new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE})
-        );
-
-        // Ícone para abrir galeria
-        findViewById(R.id.iconOpenGallery).setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, GalleryActivity.class);
-            galleryLauncher.launch(intent); // Abre a GalleryActivity
-        });
-
-        // Ícone para aplicar filtro
-        findViewById(R.id.iconApplyFilter).setOnClickListener(v -> {
-            // Verificar se há uma imagem selecionada
-            Drawable drawable = imageViewGallery.getDrawable();
-            if (drawable != null && drawable instanceof BitmapDrawable ) {
-
-                Bitmap originalBitmap = ((BitmapDrawable) drawable).getBitmap();
-
-                // Criar intent e passar bitmap
-                Intent intent = new Intent(MainActivity.this, FilterActivity.class);
-
-                // Salvar o Bitmap em um arquivo temporário
-                File tempFile = new File(getCacheDir(), "temp_image.png");
-                try (FileOutputStream fos = new FileOutputStream(tempFile)) {
-                    originalBitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                    fos.flush();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                intent.putExtra("imagePath", tempFile.getAbsolutePath());
-                filterLauncher.launch(intent);
-
-            } else {
-                Toast.makeText(this, "Select Image First", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void openCamera() {
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(intent, 1); // Código arbitrário para chamar a câmera
     }
 
     private void loadImage(Uri imageUri) {
         try {
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
             imageViewGallery.setImageBitmap(bitmap);
+            capturedImageBitmap = bitmap;
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(this, "Erro ao carregar imagem", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error loading image", Toast.LENGTH_SHORT).show();
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == REQUEST_CODE_FILTER && resultCode == RESULT_OK && data != null) {
-            String filteredImagePath = data.getStringExtra("filteredBitmapPath");
-
-            if (filteredImagePath != null) {
-                // Decodificar o bitmap a partir do caminho do arquivo
-                Bitmap filteredBitmap = BitmapFactory.decodeFile(filteredImagePath);
-
-                if (filteredBitmap != null) {
-                    ImageView imageViewGallery = findViewById(R.id.imageViewGallery); // Atualize para o ID correto
-                    imageViewGallery.setImageBitmap(filteredBitmap); // Atualiza o ImageView com a imagem filtrada
-                } else {
-                    Toast.makeText(this, "Failed to load the filtered image.", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Toast.makeText(this, "No filtered image received.", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        Intent intent = new Intent(MainActivity.this, SignInScreen.class);
-        startActivity(intent);
-        finish();
-        super.onBackPressed();
-    }
-
-    private void openAdminPanel(String email) {
-        if ("jessicamaximo23@gmail.com".equals(email)) {
-            Intent intent = new Intent(MainActivity.this, AdminPanelActivity.class);
-            startActivity(intent);
-        }
-    }
-
-    //Save photo after aplly filter
-    private void saveImageToStorage(Bitmap bitmap) {
-        if (!hasWritePermission()) {
-            requestWritePermission();
-            return;
-        }
-
-        // Caminho do diretório onde as imagens serão salvas
-        File imagesDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "EasyFilter");
-        if (!imagesDir.exists()) {
-            imagesDir.mkdirs(); // Cria o diretório se não existir
-        }
-
-        // Nome do arquivo de imagem
-        String fileName = "filtered_image_" + System.currentTimeMillis() + ".png";
-        File imageFile = new File(imagesDir, fileName);
-
-        try (FileOutputStream fos = new FileOutputStream(imageFile)) {
-            // Comprime o bitmap e escreve no arquivo
+    private File saveBitmapToFile(Bitmap bitmap) {
+        File tempFile = new File(getCacheDir(), "temp_image.png");
+        try (FileOutputStream fos = new FileOutputStream(tempFile)) {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.flush();
-
-            // Notifica o usuário que a imagem foi salva
-            Toast.makeText(this, "Image saved successfully", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
         }
-        //notify gallery when the photo is finish
-        // Notifica a Galeria
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.DATA, imageFile.getAbsolutePath());
-        values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
-        getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-
+        return tempFile;
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == REQUEST_WRITE_STORAGE_PERMISSION) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                saveImageToStorage(bitmapToSave);
-            } else {
-                Toast.makeText(this, "Permission denied to write to storage", Toast.LENGTH_SHORT).show();
-            }
-        }
+    private void openCamera() {
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        cameraLauncher.launch(cameraIntent); // Abre a câmera
     }
 }

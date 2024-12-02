@@ -1,12 +1,15 @@
 package com.example.easyfilterporject;
 
-import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import androidx.appcompat.app.AppCompatActivity;
+
+
 import jp.co.cyberagent.android.gpuimage.GPUImage;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageBrightnessFilter;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageColorInvertFilter;
@@ -22,6 +25,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
 
 public class FilterActivity extends AppCompatActivity {
 
@@ -80,7 +84,6 @@ public class FilterActivity extends AppCompatActivity {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 updateBrightnessAndContrast();
             }
-
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
@@ -141,12 +144,17 @@ public class FilterActivity extends AppCompatActivity {
     private void saveAndReturn() {
 
         if (gpuImage != null) {
-            Bitmap resultBitmap = gpuImage.getBitmapWithFilterApplied();
-            Intent resultIntent = new Intent();
-            resultIntent.putExtra("filteredBitmapPath", saveBitmapToCache(resultBitmap));
-            setResult(RESULT_OK, resultIntent);
 
-            finish();
+            Bitmap resultBitmap = gpuImage.getBitmapWithFilterApplied();
+
+            // Salva o Bitmap no cache e retorna o caminho do arquivo
+            String savedImagePath = saveBitmapToCache(resultBitmap);
+
+            if (savedImagePath != null) {
+                Toast.makeText(this, "Image saved at: " + savedImagePath, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Failed to save the filtered image", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -190,4 +198,20 @@ public class FilterActivity extends AppCompatActivity {
 
 
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permissão concedida, você pode continuar com o acesso ao armazenamento
+                saveAndReturn();
+            } else {
+                // Permissão negada, você pode informar ao usuário
+                Toast.makeText(this, "Permission denied to write external storage", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
 }
+
