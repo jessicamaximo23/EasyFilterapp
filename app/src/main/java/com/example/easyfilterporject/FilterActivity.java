@@ -33,9 +33,11 @@ public class FilterActivity extends AppCompatActivity {
 
     private ImageView filteredImageView;
     private SeekBar brightnessSeekBar, contrastSeekBar;
-    private Button applyFilterButton;
     private Bitmap originalBitmap;
     private GPUImage gpuImage;
+    private GPUImageFilter activeFilter = null;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,12 +46,15 @@ public class FilterActivity extends AppCompatActivity {
 
         ImageView iconViewFilters = findViewById(R.id.iconViewFilters);
         LinearLayout filterButtonsContainer = findViewById(R.id.filterButtonsContainer);
+        ImageView iconSavePhoto = findViewById(R.id.iconSavePhoto);
+
+
 
         // Inicialização dos elementos de UI
         filteredImageView = findViewById(R.id.filteredImageView);
         brightnessSeekBar = findViewById(R.id.brightnessSeekBar);
         contrastSeekBar = findViewById(R.id.contrastSeekBar);
-        applyFilterButton = findViewById(R.id.applyFilterButton);
+
 
         // Recuperar o caminho da imagem
         String imagePath = getIntent().getStringExtra("imagePath");
@@ -69,7 +74,7 @@ public class FilterActivity extends AppCompatActivity {
             gpuImage.setImage(originalBitmap);
             filteredImageView.setImageBitmap(originalBitmap);
 
-            applyFilterButton.setOnClickListener(v -> saveAndReturn());
+
         } else {
             // Caso o caminho seja nulo, informa o usuário e fecha a Activity
             Toast.makeText(this, "Image path is missing", Toast.LENGTH_SHORT).show();
@@ -125,6 +130,12 @@ public class FilterActivity extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
+
+        //After apply filter save the photo on my cell
+        iconSavePhoto.setOnClickListener(v -> savePhotoToGallery());
+
+
+
     }
 
 
@@ -141,6 +152,14 @@ public class FilterActivity extends AppCompatActivity {
         float contrast = contrastSeekBar.getProgress() / 100.0f;
 
         GPUImageFilterGroup filterGroup = new GPUImageFilterGroup();
+
+        //put the option for user add one filter + contrast and bright
+
+        // Adiciona o filtro ativo, se houver
+        if (activeFilter != null) {
+            filterGroup.addFilter(activeFilter);
+        }
+
         filterGroup.addFilter(new GPUImageBrightnessFilter(brightness));
         filterGroup.addFilter(new GPUImageContrastFilter(contrast));
 
@@ -152,6 +171,9 @@ public class FilterActivity extends AppCompatActivity {
 
     //if the user want to reset the image
     private void resetToOriginal() {
+
+        activeFilter = null;
+
         if (gpuImage != null) {
             gpuImage.setImage(originalBitmap);
             filteredImageView.setImageBitmap(originalBitmap);
@@ -192,6 +214,8 @@ public class FilterActivity extends AppCompatActivity {
 
     private void applyGrayScaleFilter() {
 
+        applyGPUFilter(new GPUImageGrayscaleFilter());
+
         if (gpuImage != null) {
             gpuImage.setFilter(new GPUImageGrayscaleFilter());
             filteredImageView.setImageBitmap(gpuImage.getBitmapWithFilterApplied());
@@ -200,6 +224,8 @@ public class FilterActivity extends AppCompatActivity {
 
     private void applySepiaFilter() {
 
+        applyGPUFilter(new GPUImageSepiaToneFilter());
+
         if (gpuImage != null) {
             gpuImage.setFilter(new GPUImageSepiaToneFilter());
             filteredImageView.setImageBitmap(gpuImage.getBitmapWithFilterApplied());
@@ -207,6 +233,9 @@ public class FilterActivity extends AppCompatActivity {
     }
 
     private void applyNegativeFilter() {
+
+        applyGPUFilter(new GPUImageColorInvertFilter());
+
 
         if (gpuImage != null) {
             gpuImage.setFilter(new GPUImageColorInvertFilter());
@@ -229,6 +258,49 @@ public class FilterActivity extends AppCompatActivity {
             }
         }
     }
+
+    //save the photo on my cel
+    private void savePhotoToGallery() {
+        if (gpuImage == null) {
+            Toast.makeText(this, "No image to save", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Bitmap resultBitmap = gpuImage.getBitmapWithFilterApplied();
+
+        if (resultBitmap == null) {
+            Toast.makeText(this, "Failed to apply filter", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Verifica permissões para Android 6.0+ (API 23+)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                return;
+            }
+        }
+
+        // Salvar no armazenamento externo
+        try {
+            File picturesDir = new File(getExternalFilesDir(null), "EasyFilterPhotos");
+            if (!picturesDir.exists()) {
+                picturesDir.mkdirs();
+            }
+
+            File imageFile = new File(picturesDir, "filtered_" + System.currentTimeMillis() + ".png");
+            FileOutputStream outputStream = new FileOutputStream(imageFile);
+            resultBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.flush();
+            outputStream.close();
+
+            Toast.makeText(this, "Saved: " + imageFile.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
 }
 

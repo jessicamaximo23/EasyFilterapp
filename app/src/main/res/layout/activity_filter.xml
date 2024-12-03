@@ -54,7 +54,8 @@
         android:padding="10dp"
         android:elevation="8dp"
         android:gravity="center"
-        android:layout_alignParentBottom="true">
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="10dp">
 
         <!-- Opção 1: Salvar a foto -->
         <LinearLayout
@@ -138,49 +139,46 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- LinearLayout dos filtros que estará inicialmente invisível -->
+
     <LinearLayout
         android:id="@+id/filterButtonsContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="8dp"
-        android:visibility="gone">  <!-- Inicialmente invisível -->
+        android:visibility="gone">
 
         <Button
             android:id="@+id/btnFilterGrayScale"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Gray Scale" />
+            android:layout_marginStart="250dp"
+            android:text="Gray" />
 
         <Button
             android:id="@+id/btnFilterSepia"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="250dp"
+            android:backgroundTint="#4CAF50"
             android:text="Sepia" />
 
         <Button
             android:id="@+id/btnFilterNegative"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="250dp"
+            android:backgroundTint="#FFC107"
             android:text="Negative" />
 
         <Button
             android:id="@+id/btnFilterOriginal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="250dp"
+            android:backgroundTint="#FF5722"
             android:text="Original" />
 
-        <Button
-            android:id="@+id/applyFilterButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:backgroundTint="#FFC107"
-            android:gravity="center"
-            android:text="Apply Filter" />
+
     </LinearLayout>
 </LinearLayout>
