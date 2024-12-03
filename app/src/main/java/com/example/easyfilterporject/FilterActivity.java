@@ -1,10 +1,15 @@
 package com.example.easyfilterporject;
 
+import android.content.ContentValues;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -27,6 +32,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 
 public class FilterActivity extends AppCompatActivity {
@@ -47,8 +53,6 @@ public class FilterActivity extends AppCompatActivity {
         ImageView iconViewFilters = findViewById(R.id.iconViewFilters);
         LinearLayout filterButtonsContainer = findViewById(R.id.filterButtonsContainer);
         ImageView iconSavePhoto = findViewById(R.id.iconSavePhoto);
-
-
 
         // Inicialização dos elementos de UI
         filteredImageView = findViewById(R.id.filteredImageView);
@@ -134,8 +138,6 @@ public class FilterActivity extends AppCompatActivity {
         //After apply filter save the photo on my cell
         iconSavePhoto.setOnClickListener(v -> savePhotoToGallery());
 
-
-
     }
 
 
@@ -154,7 +156,6 @@ public class FilterActivity extends AppCompatActivity {
         GPUImageFilterGroup filterGroup = new GPUImageFilterGroup();
 
         //put the option for user add one filter + contrast and bright
-
         // Adiciona o filtro ativo, se houver
         if (activeFilter != null) {
             filterGroup.addFilter(activeFilter);
@@ -236,7 +237,6 @@ public class FilterActivity extends AppCompatActivity {
 
         applyGPUFilter(new GPUImageColorInvertFilter());
 
-
         if (gpuImage != null) {
             gpuImage.setFilter(new GPUImageColorInvertFilter());
             filteredImageView.setImageBitmap(gpuImage.getBitmapWithFilterApplied());
@@ -247,11 +247,13 @@ public class FilterActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
         if (requestCode == 1) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permissão concedida, você pode continuar com o acesso ao armazenamento
-                saveAndReturn();
+                savePhotoToGallery();
             } else {
                 // Permissão negada, você pode informar ao usuário
                 Toast.makeText(this, "Permission denied to write external storage", Toast.LENGTH_SHORT).show();
@@ -268,39 +270,50 @@ public class FilterActivity extends AppCompatActivity {
 
         Bitmap resultBitmap = gpuImage.getBitmapWithFilterApplied();
 
-        if (resultBitmap == null) {
-            Toast.makeText(this, "Failed to apply filter", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        // Android Q ou superior
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            try {
+                ContentValues values = new ContentValues();
+                values.put(MediaStore.Images.Media.DISPLAY_NAME, "filtered_" + System.currentTimeMillis() + ".png");
+                values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+                values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/EasyFilterPhotos");
 
-        // Verifica permissões para Android 6.0+ (API 23+)
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-                return;
+                Uri uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+                if (uri != null) {
+                    OutputStream outputStream = getContentResolver().openOutputStream(uri);
+                    resultBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+                    outputStream.close();
+                    Toast.makeText(this, "Saved to Photos!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Error saving image", Toast.LENGTH_SHORT).show();
             }
-        }
+        } else {
+            // Para versões abaixo do Android Q
+            File picturesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+            File appDir = new File(picturesDir, "EasyFilterPhotos");
+            if (!appDir.exists()) appDir.mkdirs();
 
-        // Salvar no armazenamento externo
-        try {
-            File picturesDir = new File(getExternalFilesDir(null), "EasyFilterPhotos");
-            if (!picturesDir.exists()) {
-                picturesDir.mkdirs();
+            File imageFile = new File(appDir, "filtered_" + System.currentTimeMillis() + ".png");
+            try (FileOutputStream outputStream = new FileOutputStream(imageFile)) {
+                resultBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+
+                // Registrar no MediaStore para aparecer na galeria
+                Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                mediaScanIntent.setData(Uri.fromFile(imageFile));
+                sendBroadcast(mediaScanIntent);
+
+                Toast.makeText(this, "Saved to Gallery!", Toast.LENGTH_SHORT).show();
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
             }
-
-            File imageFile = new File(picturesDir, "filtered_" + System.currentTimeMillis() + ".png");
-            FileOutputStream outputStream = new FileOutputStream(imageFile);
-            resultBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-            outputStream.flush();
-            outputStream.close();
-
-            Toast.makeText(this, "Saved: " + imageFile.getAbsolutePath(), Toast.LENGTH_SHORT).show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
         }
     }
-
 
 }
 
