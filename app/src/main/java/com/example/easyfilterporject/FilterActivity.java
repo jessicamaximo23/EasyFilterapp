@@ -5,7 +5,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -35,11 +37,13 @@ public class FilterActivity extends AppCompatActivity {
     private Bitmap originalBitmap;
     private GPUImage gpuImage;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_filter);
+
+        ImageView iconViewFilters = findViewById(R.id.iconViewFilters);
+        LinearLayout filterButtonsContainer = findViewById(R.id.filterButtonsContainer);
 
         // Inicialização dos elementos de UI
         filteredImageView = findViewById(R.id.filteredImageView);
@@ -57,6 +61,7 @@ public class FilterActivity extends AppCompatActivity {
 
             if (originalBitmap == null) {
                 Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show();
+                finish();
                 return;
 
             }
@@ -70,6 +75,18 @@ public class FilterActivity extends AppCompatActivity {
             Toast.makeText(this, "Image path is missing", Toast.LENGTH_SHORT).show();
             finish();
         }
+
+        iconViewFilters.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Alternar a visibilidade dos botões de filtro
+                if (filterButtonsContainer.getVisibility() == View.GONE) {
+                    filterButtonsContainer.setVisibility(View.VISIBLE); // Torna visível
+                } else {
+                    filterButtonsContainer.setVisibility(View.GONE); // Torna invisível
+                }
+            }
+        });
 
 
         // Configurar botões de filtro
