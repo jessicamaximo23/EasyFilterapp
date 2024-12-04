@@ -2,6 +2,8 @@ package com.example.easyfilterporject;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
@@ -10,6 +12,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -31,8 +35,25 @@ public class SignInScreen extends AppCompatActivity {
 
         editTextEmail = findViewById(R.id.editTextEmail);
         editTextPassword = findViewById(R.id.editTextPassword);
+        TextInputLayout textInputPassword = findViewById(R.id.textInputPassword);
         signInButton = findViewById(R.id.cirLoginButton);
         signUpButton = findViewById(R.id.signUpButton);
+
+        //Icon visibility password
+        textInputPassword.setEndIconOnClickListener(v -> {
+            if (editTextPassword.getTransformationMethod() instanceof HideReturnsTransformationMethod) {
+
+                editTextPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+            } else {
+                // Se a senha estiver oculta, mostramos ela
+                editTextPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+            }
+
+            // Atualiza o cursor para o final do texto, mantendo o foco no local certo
+            editTextPassword.setSelection(editTextPassword.getText().length());
+        });
+
+
 
         TextView resetPasswordButton = findViewById(R.id.resetPasswordButton);
         if (resetPasswordButton != null) {

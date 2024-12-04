@@ -65,16 +65,16 @@
                 android:layout_marginTop="20dp"
                 app:boxStrokeColor="@color/primaryLightColor"
                 app:hintTextColor="@color/primaryLightColor"
-                android:hint="Password">
+                android:hint="Password"
+                app:endIconMode="password_toggle">
 
-                <EditText
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editTextPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
                     android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
-
 
             <TextView
                 android:id="@+id/resetPasswordButton"

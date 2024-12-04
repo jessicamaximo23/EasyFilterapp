@@ -26,9 +26,7 @@ import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilterGroup;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageGrayscaleFilter;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageSepiaToneFilter;
 
-import android.widget.Button;
 import android.widget.Toast;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -43,8 +41,6 @@ public class FilterActivity extends AppCompatActivity {
     private GPUImage gpuImage;
     private GPUImageFilter activeFilter = null;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,25 +50,22 @@ public class FilterActivity extends AppCompatActivity {
         LinearLayout filterButtonsContainer = findViewById(R.id.filterButtonsContainer);
         ImageView iconSavePhoto = findViewById(R.id.iconSavePhoto);
 
-        // Inicialização dos elementos de UI
+
         filteredImageView = findViewById(R.id.filteredImageView);
         brightnessSeekBar = findViewById(R.id.brightnessSeekBar);
         contrastSeekBar = findViewById(R.id.contrastSeekBar);
 
 
-        // Recuperar o caminho da imagem
         String imagePath = getIntent().getStringExtra("imagePath");
 
         if (imagePath != null) {
-            // Tenta decodificar a imagem a partir do caminho
-            originalBitmap = BitmapFactory.decodeFile(imagePath);
 
+            originalBitmap = BitmapFactory.decodeFile(imagePath);
 
             if (originalBitmap == null) {
                 Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show();
                 finish();
                 return;
-
             }
             gpuImage = new GPUImage(this);
             gpuImage.setImage(originalBitmap);
@@ -90,13 +83,12 @@ public class FilterActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // Alternar a visibilidade dos botões de filtro
                 if (filterButtonsContainer.getVisibility() == View.GONE) {
-                    filterButtonsContainer.setVisibility(View.VISIBLE); // Torna visível
+                    filterButtonsContainer.setVisibility(View.VISIBLE);
                 } else {
-                    filterButtonsContainer.setVisibility(View.GONE); // Torna invisível
+                    filterButtonsContainer.setVisibility(View.GONE);
                 }
             }
         });
-
 
         // Configurar botões de filtro
         findViewById(R.id.btnFilterGrayScale).setOnClickListener(v -> applyGrayScaleFilter());
@@ -104,7 +96,7 @@ public class FilterActivity extends AppCompatActivity {
         findViewById(R.id.btnFilterNegative).setOnClickListener(v -> applyNegativeFilter());
         findViewById(R.id.btnFilterOriginal).setOnClickListener(v -> resetToOriginal());
 
-        // Ajustes de Brilho e Contraste
+
         brightnessSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -119,7 +111,7 @@ public class FilterActivity extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
-        // Ajuste dinâmico de contraste
+
         contrastSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -137,9 +129,7 @@ public class FilterActivity extends AppCompatActivity {
 
         //After apply filter save the photo on my cell
         iconSavePhoto.setOnClickListener(v -> savePhotoToGallery());
-
     }
-
 
     private void applyGPUFilter(GPUImageFilter filter) {
         if (gpuImage != null) {
@@ -156,7 +146,6 @@ public class FilterActivity extends AppCompatActivity {
         GPUImageFilterGroup filterGroup = new GPUImageFilterGroup();
 
         //put the option for user add one filter + contrast and bright
-        // Adiciona o filtro ativo, se houver
         if (activeFilter != null) {
             filterGroup.addFilter(activeFilter);
         }
@@ -172,7 +161,6 @@ public class FilterActivity extends AppCompatActivity {
 
     //if the user want to reset the image
     private void resetToOriginal() {
-
         activeFilter = null;
 
         if (gpuImage != null) {
@@ -182,7 +170,6 @@ public class FilterActivity extends AppCompatActivity {
     }
 
     private void saveAndReturn() {
-
         if (gpuImage != null) {
 
             Bitmap resultBitmap = gpuImage.getBitmapWithFilterApplied();
@@ -199,7 +186,6 @@ public class FilterActivity extends AppCompatActivity {
     }
 
     private String saveBitmapToCache(Bitmap bitmap) {
-
         try {
             File cacheDir = getCacheDir();
             File file = new File(cacheDir, "filtered_image.png");
@@ -207,9 +193,10 @@ public class FilterActivity extends AppCompatActivity {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
             outputStream.close();
             return file.getAbsolutePath();
+
         } catch (IOException e) {
             e.printStackTrace();
-            return null; // Implementar método.
+            return null;
         }
     }
 
@@ -241,8 +228,6 @@ public class FilterActivity extends AppCompatActivity {
             gpuImage.setFilter(new GPUImageColorInvertFilter());
             filteredImageView.setImageBitmap(gpuImage.getBitmapWithFilterApplied());
         }
-
-
     }
 
     @Override
@@ -270,7 +255,6 @@ public class FilterActivity extends AppCompatActivity {
 
         Bitmap resultBitmap = gpuImage.getBitmapWithFilterApplied();
 
-        // Android Q ou superior
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
             try {
                 ContentValues values = new ContentValues();
@@ -293,7 +277,7 @@ public class FilterActivity extends AppCompatActivity {
                 Toast.makeText(this, "Error saving image", Toast.LENGTH_SHORT).show();
             }
         } else {
-            // Para versões abaixo do Android Q
+
             File picturesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
             File appDir = new File(picturesDir, "EasyFilterPhotos");
             if (!appDir.exists()) appDir.mkdirs();
@@ -302,7 +286,7 @@ public class FilterActivity extends AppCompatActivity {
             try (FileOutputStream outputStream = new FileOutputStream(imageFile)) {
                 resultBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
 
-                // Registrar no MediaStore para aparecer na galeria
+
                 Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
                 mediaScanIntent.setData(Uri.fromFile(imageFile));
                 sendBroadcast(mediaScanIntent);
@@ -314,6 +298,5 @@ public class FilterActivity extends AppCompatActivity {
             }
         }
     }
-
 }
 
