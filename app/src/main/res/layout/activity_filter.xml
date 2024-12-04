@@ -170,6 +170,7 @@
             android:layout_marginStart="250dp"
             android:backgroundTint="#FFC107"
             android:text="Negative" />
+        
 
         <Button
             android:id="@+id/btnFilterOriginal"
@@ -178,6 +179,7 @@
             android:layout_marginStart="250dp"
             android:backgroundTint="#FF5722"
             android:text="Original" />
+
 
 
     </LinearLayout>
