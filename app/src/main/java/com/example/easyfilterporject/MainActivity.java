@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -24,8 +26,11 @@ import androidx.core.content.ContextCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -141,13 +146,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupUser() {
+        // Retrieve name user (welcome user)
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("users");
+        FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = auth.getCurrentUser();
+
         if (currentUser != null) {
-            textViewName.setText("Welcome, " + currentUser.getEmail());
-        } else {
-            textViewName.setText("Welcome, Guest");
+            String userId = currentUser.getUid();
+
+            databaseReference.child(userId).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                    if (dataSnapshot.exists()) {
+                        String name = dataSnapshot.getValue(String.class);
+                        textViewName.setText("Welcome, " + name);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    // Exibe mensagem padrão em caso de erro
+                    textViewName.setText("Welcome, User");
+                    Log.e("Firebase Error", "Error " + databaseError.getMessage());
+                }
+            });
         }
     }
+
 
     private void loadImage(Uri imageUri) {
         try {
