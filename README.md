@@ -1,4 +1,42 @@
-Easy Filter is an intuitive Android application designed to provide users with a seamless experience in applying, creating, and sharing custom photo and video filters. The app allows users to easily enhance their media content by choosing from a variety of preset filters or by designing their own, all through a simple and user-friendly interface.
+EasyFilter App
 
-Users can capture images and videos directly within the app, apply filters in real time, and save their customized filters as presets for future use. Additionally, Easy Filter offers functionality for exporting and importing presets, enabling users to share their creations or use others' filters across devices.
+EasyFilter is an Android application that allows users to apply basics filters to their photos easily and intuitively. The app features options for capturing photos directly with the camera, selecting images from the gallery, and a variety of ready-to-use filters to enhance your pictures.
 
+✨ Key Features
+	•	📸 In-App Camera Capture
+Take photos directly within the app for immediate editing.
+	•	🖼️ Gallery Selection
+Select any existing photo from your device’s gallery to apply filters.
+	
+🚀 How to Use
+
+	1.	Launch the App
+Open the EasyFilter App on your Android device.
+	2.	Capture or Select a Photo
+	•	Use the in-app camera to take a new photo.
+	•	Or, choose an existing photo from your gallery.
+	3.	Apply Filters
+Browse through the available filters and select your favorite one to enhance your photo.
+	4.	Save 
+Save the edited photo to your device.
+
+🛠️ Technologies Used
+
+	•	Android Studio
+Developed with modern Android development tools.
+	•	Firebase
+Used for user authentication and data storage.
+	•	Java
+For building robust and efficient app features.
+
+🤝 Contributing
+
+We welcome contributions! If you’d like to contribute to the EasyFilter App, feel free to submit a pull request or open an issue.
+
+📩 Contact
+
+For any questions or feedback, feel free to reach out to:
+Jessica Maximo
+Email: jessicamaximo23@gmail.com
+
+Let me know if you’d like to add any specific information or further customize it!
