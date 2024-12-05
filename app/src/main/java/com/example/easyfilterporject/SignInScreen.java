@@ -54,7 +54,6 @@ public class SignInScreen extends AppCompatActivity {
         });
 
 
-
         TextView resetPasswordButton = findViewById(R.id.resetPasswordButton);
         if (resetPasswordButton != null) {
             resetPasswordButton.setText("Forgot Password? Click here ");
@@ -96,26 +95,23 @@ public class SignInScreen extends AppCompatActivity {
 
                             DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users").child(user.getUid());
 
+                            // Verifica se o usuário está bloqueado
                             usersRef.get().addOnCompleteListener(task1 -> {
-                                if (task1.isSuccessful()) {
-                                    if (task1.getResult().exists()) {
+                                if (task1.isSuccessful() && task1.getResult().exists()) {
+                                    Boolean isBlocked = task1.getResult().child("isBlocked").getValue(Boolean.class);
 
+                                    if (Boolean.TRUE.equals(isBlocked)) {
+
+                                        mAuth.signOut();
+                                        Toast.makeText(SignInScreen.this, "Your account is blocked. Please contact support.", Toast.LENGTH_LONG).show();
+                                    } else {
+                                        // Verifica se é admin ou usuário comum
+                                        navigateToNextScreen(email);
                                     }
                                 } else {
                                     Toast.makeText(SignInScreen.this, "Failed to load user data", Toast.LENGTH_SHORT).show();
                                 }
                             });
-
-                            try {
-                                if (email.equals("jessicamaximo23@gmail.com")) {
-                                    startActivity(new Intent(SignInScreen.this, AdminPanelActivity.class));
-                                } else {
-                                    startActivity(new Intent(SignInScreen.this, MainActivity.class));
-                                }
-                                finish();
-                            } catch (Exception e) {
-                                Toast.makeText(SignInScreen.this, "Error opening Admin Panel: ", Toast.LENGTH_SHORT).show();
-                            }
                         } else {
                             Toast.makeText(SignInScreen.this, "User is null after login", Toast.LENGTH_SHORT).show();
                         }
@@ -124,5 +120,18 @@ public class SignInScreen extends AppCompatActivity {
                         Toast.makeText(SignInScreen.this, "Password or Email wrong", Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    private void navigateToNextScreen(String email) {
+        try {
+            if (email.equals("jessicamaximo23@gmail.com")) {
+                startActivity(new Intent(SignInScreen.this, AdminPanelActivity.class));
+            } else {
+                startActivity(new Intent(SignInScreen.this, MainActivity.class));
+            }
+            finish();
+        } catch (Exception e) {
+            Toast.makeText(SignInScreen.this, "Error opening Admin Panel: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 }
