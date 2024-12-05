@@ -5,21 +5,17 @@ public class User {
     private String name;
     private String id;
     private String email;
+    private boolean isBlocked;
 
     public User() {
 
     }
-     public User(String name, String email) {
+     public User(String name, String email, boolean isBlocked) {
         this.name = name;
         this.email = email;
+        this.isBlocked = false;
     }
 
-
-    public User(String id, String name, String email) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-    }
     public String getName() {
         return name;
     }
@@ -42,5 +38,12 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+    public boolean isBlocked() {
+        return isBlocked;
+    }
+
+    public void setBlocked(boolean blocked) {
+        isBlocked = blocked;
     }
 }

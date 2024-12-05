@@ -59,9 +59,11 @@ public class AdminPanelActivity extends AppCompatActivity  {
             }
 
             @Override
-            public void onDeleteClick(String userId) {
-                deleteUser(userId);
+            public void onBlockToggleClick(User user) {
+                toggleBlockEmail(user.getId(), user.isBlocked());
             }
+
+
         });
 
         recyclerViewUsers.setAdapter(usersAdapter);
@@ -103,59 +105,61 @@ public class AdminPanelActivity extends AppCompatActivity  {
         });
     }
 
-    private void deleteUser(String userId) {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-
-         if (currentUser != null && currentUser.getEmail().equals("jessicamaximo23@gmail.com")) {
-
-            usersRef.child(userId).removeValue()
-                    .addOnSuccessListener(aVoid ->
-                            Toast.makeText(AdminPanelActivity.this, "User deleted from Database", Toast.LENGTH_SHORT).show()
-                    )
-                    .addOnFailureListener(e ->
-                            Toast.makeText(AdminPanelActivity.this, "Failed to delete user from Database", Toast.LENGTH_SHORT).show()
-                    );
-        } else {
-            Toast.makeText(AdminPanelActivity.this, "Access Denied: Admin Only", Toast.LENGTH_SHORT).show();
-        }
-    }
     private void showEditDialog(User user) {
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-        final EditText editTextNewEmail = new EditText(this);
-        editTextNewEmail.setText(user.getEmail());
 
-        dialogBuilder.setTitle("Edit Email")
-                .setView(editTextNewEmail)
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        final EditText editTextName = new EditText(this);
+        editTextName.setText(user.getEmail());
+
+        dialogBuilder.setTitle("Edit Name")
+                .setView(editTextName)
                 .setPositiveButton("Save", (dialog, which) -> {
 
-                    String newEmail = editTextNewEmail.getText().toString().trim();
-                    if (!newEmail.isEmpty()) {
-                        updateUserEmail(user.getId(), newEmail);
+                    String Name = editTextName.getText().toString().trim();
+
+                    if (!Name.isEmpty()) {
+                        updateUserName(user.getId(), Name);
                     } else {
-                        Toast.makeText(AdminPanelActivity.this, "Email cannot be empty", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AdminPanelActivity.this, "Name cannot be empty", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
 
-    private void updateUserEmail(String userId, String newEmail) {
+    private void updateUserName(String userId, String Name) {
 
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         if (currentUser != null && currentUser.getEmail().equals("jessicamaximo23@gmail.com")) {
 
             HashMap<String, Object> updates = new HashMap<>();
-            updates.put("email", newEmail);
+            updates.put("Name", Name);
             usersRef.child(userId).updateChildren(updates)
                     .addOnSuccessListener(aVoid ->
-                            Toast.makeText(AdminPanelActivity.this, "Email updated in Database", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(AdminPanelActivity.this, "Name updated in Database", Toast.LENGTH_SHORT).show()
                     )
                     .addOnFailureListener(e ->
-                            Toast.makeText(AdminPanelActivity.this, "Failed to update email in Database", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(AdminPanelActivity.this, "Failed to update Name in Database", Toast.LENGTH_SHORT).show()
                     );
         } else {
             Toast.makeText(AdminPanelActivity.this, "Access Denied: Admin Only", Toast.LENGTH_SHORT).show();
         }
     }
+
+    private void toggleBlockEmail(String userId, boolean isBlocked) {
+
+        HashMap<String, Object> updates = new HashMap<>();
+
+        updates.put("isBlocked", !isBlocked);
+        usersRef.child(userId).updateChildren(updates)
+                .addOnSuccessListener(aVoid -> {
+                    String message = isBlocked ? "User unlocked" : "User blocked";
+                    Toast.makeText(AdminPanelActivity.this, message, Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(AdminPanelActivity.this, "Failed to update block status in Database", Toast.LENGTH_SHORT).show()
+                );
+    }
+
 }

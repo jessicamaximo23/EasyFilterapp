@@ -17,7 +17,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     public interface OnUserClickListener {
 
         void onEditClick(User user);
-        void onDeleteClick(String userId);
+        void onBlockToggleClick(User user);
     }
 
     public UsersAdapter(ArrayList<User> users, OnUserClickListener listener) {
@@ -35,11 +35,14 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
         User user = users.get(position);
+
         holder.textViewName.setText(user.getName());
         holder.textViewUserEmail.setText(user.getEmail());
 
         holder.buttonEditUser.setOnClickListener(v -> onUserClickListener.onEditClick(user));
-        holder.buttonDeleteUser.setOnClickListener(v -> onUserClickListener.onDeleteClick(user.getId()));
+        // Configurando o botão Bloquear/Desbloquear
+        holder.buttonBlockUser.setText(user.isBlocked() ? "Unblock" : "Block");
+        holder.buttonBlockUser.setOnClickListener(v -> onUserClickListener.onBlockToggleClick(user));
     }
 
     @Override
@@ -49,14 +52,14 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
 
     static class UserViewHolder extends RecyclerView.ViewHolder {
         TextView textViewName,textViewUserEmail;
-        Button buttonEditUser,buttonDeleteUser;
+        Button buttonEditUser,buttonBlockUser;
 
         UserViewHolder(View itemView) {
             super(itemView);
             textViewName = itemView.findViewById(R.id.textViewName);
             textViewUserEmail = itemView.findViewById(R.id.textViewUserEmail);
             buttonEditUser = itemView.findViewById(R.id.buttonEditUser);
-            buttonDeleteUser = itemView.findViewById(R.id.buttonDeleteUser);
+            buttonBlockUser = itemView.findViewById(R.id.buttonBlockUser);
         }
     }
 }

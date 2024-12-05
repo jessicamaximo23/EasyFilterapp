@@ -62,7 +62,7 @@ public class SignUpScreen extends AppCompatActivity {
                             DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
                             String userId = user.getUid();
 
-                            User newUser = new User(username, email);
+                            User newUser = new User(username, email, false);
 
                             usersRef.child(userId).setValue(newUser)
                                     .addOnSuccessListener(aVoid -> {
