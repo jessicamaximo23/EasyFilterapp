@@ -83,109 +83,143 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:layout_marginTop="40dp"
                 android:gravity="center"
-                android:layout_marginTop="40dp">
+                android:orientation="horizontal">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:orientation="vertical">
 
                     <ImageView
                         android:id="@+id/iconOpenGallery"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
-                        android:src="@drawable/gallery"
-                        android:contentDescription="Abrir Galeria"
+                        android:background="?attr/selectableItemBackgroundBorderless"
                         android:clickable="true"
+                        android:contentDescription="Abrir Galeria"
                         android:focusable="true"
                         android:padding="10dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/gallery"
                         app:tint="@color/successColor" />
 
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Gallery"
-                        android:textSize="14sp"
                         android:layout_marginTop="8dp"
-                        android:gravity="center" />
+                        android:gravity="center"
+                        android:text="Gallery"
+                        android:textSize="14sp" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginEnd="24dp"
-                    android:gravity="center">
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:gravity="center"
+                    android:orientation="vertical">
 
                     <ImageView
                         android:id="@+id/iconApplyFilter"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
-                        android:src="@drawable/filter_"
-                        android:contentDescription="Aplicar Filtro"
                         android:clickable="true"
+                        android:contentDescription="Aplicar Filtro"
                         android:focusable="true"
                         android:padding="10dp"
+                        android:src="@drawable/filter_"
                         app:tint="@color/warningColor" />
-
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Apply Filter"
-                        android:textSize="14sp"
                         android:layout_marginTop="8dp"
-                        android:gravity="center" />
+                        android:gravity="center"
+                        android:text="Apply Filter"
+                        android:textSize="14sp" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:orientation="vertical">
 
                     <ImageView
                         android:id="@+id/iconTakePhoto"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
-                        android:src="@drawable/ic_add_a_photo_"
-                        android:contentDescription="Take photo"
+                        android:background="?attr/selectableItemBackgroundBorderless"
                         android:clickable="true"
+                        android:contentDescription="Take photo"
                         android:focusable="true"
                         android:padding="10dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_add_a_photo_"
                         app:tint="@color/infoColor" />
 
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Câmera"
-                        android:textSize="14sp"
                         android:layout_marginTop="8dp"
-                        android:gravity="center" />
+                        android:gravity="center"
+                        android:text="Câmera"
+                        android:textSize="14sp" />
                 </LinearLayout>
-            </LinearLayout>
 
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/iconSavePhoto"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:contentDescription="Save Photo"
+                        android:src="@drawable/save_image"
+                        android:tint="@color/buttonColor"
+                        />
+
+                    <TextView
+                        android:layout_width="84dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginTop="18dp"
+                        android:gravity="center"
+                        android:text="Save Photo"
+                        android:textSize="14sp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
 
             <ImageView
                 android:id="@+id/imageViewGallery"
                 android:layout_width="match_parent"
                 android:layout_height="500dp"
                 android:scaleType="fitCenter"
-                android:adjustViewBounds="true"
-                />
+                android:adjustViewBounds="true"/>
+
+
+            <ImageButton
+                android:id="@+id/iconRotate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:contentDescription="Rotate Image"
+                android:src="@drawable/ic_rotate" />
+
 
         </LinearLayout>
 
+
     </ScrollView>
-
-
-
 </RelativeLayout>

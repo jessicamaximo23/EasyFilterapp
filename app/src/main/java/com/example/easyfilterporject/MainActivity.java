@@ -3,8 +3,8 @@ package com.example.easyfilterporject;
 import android.Manifest;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,10 +19,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -35,6 +32,9 @@ import com.google.firebase.database.ValueEventListener;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+
+import jp.co.cyberagent.android.gpuimage.GPUImage;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -46,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> galleryLauncher;
     private ActivityResultLauncher<String[]> cameraPermissionsLauncher;
     private ActivityResultLauncher<Intent> cameraLauncher;
+    private GPUImage gpuImage;
+    private Matrix matrix = new Matrix();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +68,24 @@ public class MainActivity extends AppCompatActivity {
 
         // Configura o nome do usuário
         setupUser();
+
+        findViewById(R.id.iconRotate).setOnClickListener(v -> rotateImage(90));
+    }
+
+    private void rotateImage(int degrees) {
+        if (capturedImageBitmap != null) {
+            // Aplica a rotação na imagem
+            matrix.postRotate(degrees); // Gira a imagem de acordo com a quantidade de graus
+
+            // Cria uma nova imagem com a rotação aplicada
+            Bitmap rotatedBitmap = Bitmap.createBitmap(capturedImageBitmap, 0, 0, capturedImageBitmap.getWidth(), capturedImageBitmap.getHeight(), matrix, true);
+
+            // Atualiza a ImageView com a imagem rotacionada
+            imageViewGallery.setImageBitmap(rotatedBitmap);
+
+            // Atualiza a imagem capturada com a imagem rotacionada
+            capturedImageBitmap = rotatedBitmap;
+        }
     }
 
     private void initUI() {
@@ -135,6 +155,15 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Capture or select an image first", Toast.LENGTH_SHORT).show();
             }
         });
+
+        // Ícone para salvar foto
+        findViewById(R.id.iconSavePhoto).setOnClickListener(v -> {
+            if (capturedImageBitmap != null) {
+                savePhotoToGallery(capturedImageBitmap);
+            } else {
+                Toast.makeText(this, "No image to save", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void setupButtonBack() {
@@ -143,6 +172,55 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
+    }
+
+    //save the photo on my cel
+    private void savePhotoToGallery(Bitmap resultBitmap) {
+        if (resultBitmap == null) {
+            Toast.makeText(this, "No image to save", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            try {
+                ContentValues values = new ContentValues();
+                values.put(MediaStore.Images.Media.DISPLAY_NAME, "filtered_" + System.currentTimeMillis() + ".png");
+                values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+                values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/EasyFilterPhotos");
+
+                Uri uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+                if (uri != null) {
+                    OutputStream outputStream = getContentResolver().openOutputStream(uri);
+                    resultBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+                    outputStream.close();
+                    Toast.makeText(this, "Saved to Photos!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Error saving image", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            File picturesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+            File appDir = new File(picturesDir, "EasyFilterPhotos");
+            if (!appDir.exists()) appDir.mkdirs();
+
+            File imageFile = new File(appDir, "filtered_" + System.currentTimeMillis() + ".png");
+            try (FileOutputStream outputStream = new FileOutputStream(imageFile)) {
+                resultBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+
+                Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                mediaScanIntent.setData(Uri.fromFile(imageFile));
+                sendBroadcast(mediaScanIntent);
+
+                Toast.makeText(this, "Saved to Gallery!", Toast.LENGTH_SHORT).show();
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void setupUser() {

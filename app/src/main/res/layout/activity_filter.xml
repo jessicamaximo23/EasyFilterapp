@@ -170,7 +170,7 @@
             android:layout_marginStart="250dp"
             android:backgroundTint="#FFC107"
             android:text="Negative" />
-        
+
 
         <Button
             android:id="@+id/btnFilterOriginal"
