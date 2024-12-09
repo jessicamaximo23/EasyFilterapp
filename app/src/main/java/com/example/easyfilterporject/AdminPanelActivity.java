@@ -109,16 +109,16 @@ public class AdminPanelActivity extends AppCompatActivity  {
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         final EditText editTextName = new EditText(this);
-        editTextName.setText(user.getEmail());
+        editTextName.setText(user.getName());
 
         dialogBuilder.setTitle("Edit Name")
                 .setView(editTextName)
                 .setPositiveButton("Save", (dialog, which) -> {
 
-                    String Name = editTextName.getText().toString().trim();
+                    String name = editTextName.getText().toString().trim();
 
-                    if (!Name.isEmpty()) {
-                        updateUserName(user.getId(), Name);
+                    if (!name.isEmpty()) {
+                        updateUserName(user.getId(), name);
                     } else {
                         Toast.makeText(AdminPanelActivity.this, "Name cannot be empty", Toast.LENGTH_SHORT).show();
                     }
@@ -127,24 +127,28 @@ public class AdminPanelActivity extends AppCompatActivity  {
                 .show();
     }
 
-    private void updateUserName(String userId, String Name) {
+    private void updateUserName(String userId, String newName) {
 
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        HashMap<String, Object> updates = new HashMap<>();
+        updates.put("name", newName);
 
-        if (currentUser != null && currentUser.getEmail().equals("jessicamaximo23@gmail.com")) {
+        usersRef.child(userId).updateChildren(updates)
+          .addOnSuccessListener(aVoid -> {
 
-            HashMap<String, Object> updates = new HashMap<>();
-            updates.put("Name", Name);
-            usersRef.child(userId).updateChildren(updates)
-                    .addOnSuccessListener(aVoid ->
-                            Toast.makeText(AdminPanelActivity.this, "Name updated in Database", Toast.LENGTH_SHORT).show()
-                    )
-                    .addOnFailureListener(e ->
-                            Toast.makeText(AdminPanelActivity.this, "Failed to update Name in Database", Toast.LENGTH_SHORT).show()
-                    );
-        } else {
-            Toast.makeText(AdminPanelActivity.this, "Access Denied: Admin Only", Toast.LENGTH_SHORT).show();
+        for (int i = 0; i < userList.size(); i++) {
+            User user = userList.get(i);
+            if (user.getId().equals(userId)) {
+                user.setName(newName);
+                usersAdapter.notifyItemChanged(i);
+                break;
+            }
         }
+            Toast.makeText(AdminPanelActivity.this, "User name updated", Toast.LENGTH_SHORT).show();
+        })
+                .addOnFailureListener(e -> {
+                    // Caso ocorra algum erro ao atualizar no Firebase
+                    Toast.makeText(AdminPanelActivity.this, "Failed to update name in Database", Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void toggleBlockEmail(String userId, boolean isBlocked) {
