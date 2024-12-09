@@ -12,7 +12,6 @@
     android:focusableInTouchMode="true"
     android:gravity="center">
 
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -24,6 +23,7 @@
             android:orientation="vertical"
             android:padding="20dp"
             android:gravity="start">
+
 
             <ImageButton
                 android:id="@+id/buttonBack"
@@ -42,12 +42,18 @@
                 android:src="@drawable/easyfilterlogo"
                 android:layout_gravity="center_horizontal"/>
 
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="20dp"
             android:gravity="center_horizontal">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical">
 
             <TextView
                 android:id="@+id/textViewName"
@@ -67,6 +73,17 @@
                 android:textColor="@color/primaryColor"
                 android:layout_marginTop="10dp"
                 android:textAlignment="center" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fabEditProfile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:backgroundTint="@color/white"
+                android:contentDescription="Edit Profile"
+                android:src="@drawable/ic_edit" />
+            </RelativeLayout>
 
             <TextView
                 android:layout_width="wrap_content"
