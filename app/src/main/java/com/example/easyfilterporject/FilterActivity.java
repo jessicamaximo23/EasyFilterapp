@@ -35,13 +35,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
-
-
-
 
 public class FilterActivity extends AppCompatActivity {
 
@@ -323,6 +325,16 @@ public class FilterActivity extends AppCompatActivity {
         // Nome do arquivo no Firebase Storage (adicione um timestamp para garantir nomes exclusivos)
         String fileName = "images/filtered_" + System.currentTimeMillis() + ".png";
 
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (currentUser == null) {
+            Toast.makeText(this, "User is not logged in", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        //Conect user + photo
+        String email = currentUser.getEmail();
+        String name = currentUser.getDisplayName();
+
         // Referência ao arquivo no Firebase
         StorageReference imageRef = storageRef.child(fileName);
 
@@ -330,12 +342,12 @@ public class FilterActivity extends AppCompatActivity {
         imageRef.putFile(imageUri)
                 .addOnSuccessListener(taskSnapshot -> {
                     // Caso o upload tenha sucesso, exibe uma mensagem de sucesso
-                    Toast.makeText(this, "Imagem carregada no Firebase Storage!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Image uploaded to Firebase Storage!", Toast.LENGTH_SHORT).show();
 
-                    // Opcional: obter a URL do download da imagem
+                   
                     imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                        // Aqui você pode armazenar a URL ou fazer algo com a imagem
-                        Log.d("Firebase", "URL de download: " + uri.toString());
+
+                        saveImageDataToFirestore(uri.toString(), email, name);
                     });
                 })
                 .addOnFailureListener(e -> {
@@ -345,8 +357,31 @@ public class FilterActivity extends AppCompatActivity {
                 });
     }
 
+    private void saveImageDataToFirestore(String imageUrl, String email, String name) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Criar um objeto com os dados da imagem
+        Map<String, Object> imageData = new HashMap<>();
+        imageData.put("imageUrl", imageUrl);
+        imageData.put("email", email);
+        imageData.put("name", name);
+        imageData.put("timestamp", FieldValue.serverTimestamp());
+
+        // Salvar os dados no Firestore
+        db.collection("user_images")
+                .add(imageData)
+                .addOnSuccessListener(documentReference -> {
+                    Toast.makeText(this, "Image data saved to Firestore", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to save image data", Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                });
+    }
+
 
     private void savePhotoToGalleryAndFirebase() {
+
         if (gpuImage == null) {
             Toast.makeText(this, "No image to save", Toast.LENGTH_SHORT).show();
             return;
