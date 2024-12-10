@@ -94,21 +94,6 @@
             android:clickable="true"
             android:focusable="true">
 
-            <ImageView
-                android:id="@+id/iconCreateFilter"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@drawable/create_filter"
-                android:contentDescription="Create Filter"
-                app:tint="@color/primaryColor" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="New Filter"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"
-                android:gravity="center" />
         </LinearLayout>
 
         <!-- Opção 3: Ver filtros salvos -->

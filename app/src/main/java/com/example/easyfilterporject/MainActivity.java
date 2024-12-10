@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -19,8 +20,10 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -35,7 +38,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import jp.co.cyberagent.android.gpuimage.GPUImage;
-
 public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
@@ -48,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> cameraLauncher;
     private GPUImage gpuImage;
     private Matrix matrix = new Matrix();
+    private FloatingActionButton fabEditProfile;
+    private DatabaseReference databaseRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +73,14 @@ public class MainActivity extends AppCompatActivity {
         // Configura o nome do usuário
         setupUser();
 
+        setupEditProfile();
+
         findViewById(R.id.iconRotate).setOnClickListener(v -> rotateImage(90));
+
+
+
+
+
     }
 
     private void rotateImage(int degrees) {
@@ -93,9 +104,37 @@ public class MainActivity extends AppCompatActivity {
         textViewName = findViewById(R.id.textViewName);
         imageViewGallery = findViewById(R.id.imageViewGallery);
         buttonBack = findViewById(R.id.buttonBack);
+        fabEditProfile = findViewById(R.id.fabEditProfile);
     }
 
     private void setupLaunchers() {
+
+        // Recupera o nome do usuário
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("users");
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = auth.getCurrentUser();
+
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+
+            databaseReference.child(userId).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        String name = dataSnapshot.getValue(String.class);
+                        textViewName.setText( name);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    // Exibe mensagem padrão em caso de erro
+                    textViewName.setText("");
+                    Log.e("Firebase Error", "Error " + databaseError.getMessage());
+                }
+            });
+        }
+
         galleryLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -133,17 +172,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupIconListeners() {
-        // Ícone para abrir a câmera
+
         findViewById(R.id.iconTakePhoto).setOnClickListener(v ->
                 cameraPermissionsLauncher.launch(new String[]{Manifest.permission.CAMERA}));
 
-        // Ícone para abrir a galeria
+
         findViewById(R.id.iconOpenGallery).setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             galleryLauncher.launch(intent); // Abre a galeria
         });
 
-        // Ícone para aplicar filtro
+
         findViewById(R.id.iconApplyFilter).setOnClickListener(v -> {
             if (capturedImageBitmap != null) {
                 Intent intent = new Intent(MainActivity.this, FilterActivity.class);
@@ -238,14 +277,14 @@ public class MainActivity extends AppCompatActivity {
 
                     if (dataSnapshot.exists()) {
                         String name = dataSnapshot.getValue(String.class);
-                        textViewName.setText("Welcome, " + name);
+                        textViewName.setText(name);
                     }
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
                     // Exibe mensagem padrão em caso de erro
-                    textViewName.setText("Welcome, User");
+                    textViewName.setText("");
                     Log.e("Firebase Error", "Error " + databaseError.getMessage());
                 }
             });
@@ -279,4 +318,44 @@ public class MainActivity extends AppCompatActivity {
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         cameraLauncher.launch(cameraIntent); // Abre a câmera
     }
+
+
+    private void setupEditProfile() {
+        fabEditProfile.setOnClickListener(v -> {
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle("Edit Profile Name");
+
+
+            final EditText input = new EditText(MainActivity.this);
+            input.setText(textViewName.getText());
+            builder.setView(input);
+
+            builder.setPositiveButton("Save", (dialog, which) -> {
+                String newName = input.getText().toString();
+                if (!newName.isEmpty()) {
+
+                    updateUserName(newName);
+                    textViewName.setText( newName);
+                    Toast.makeText(MainActivity.this, "Name updated!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Name cannot be empty", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
+            builder.show();
+        });
+    }
+
+    private void updateUserName(String newName) {
+        FirebaseUser currentUser = auth.getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+            databaseRef = FirebaseDatabase.getInstance().getReference("users");
+            databaseRef.child(userId).child("name").setValue(newName);
+        }
+    }
 }
+
