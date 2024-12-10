@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
     private ImageView imageViewGallery;
-    private ImageButton buttonBack;
+    private ImageButton buttonBack,fabEditProfile;
     private TextView textViewName;
     private Bitmap capturedImageBitmap;
     private ActivityResultLauncher<Intent> galleryLauncher;
@@ -50,7 +50,6 @@ public class MainActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> cameraLauncher;
     private GPUImage gpuImage;
     private Matrix matrix = new Matrix();
-    private FloatingActionButton fabEditProfile;
     private DatabaseReference databaseRef;
 
     @Override
@@ -77,24 +76,17 @@ public class MainActivity extends AppCompatActivity {
 
         findViewById(R.id.iconRotate).setOnClickListener(v -> rotateImage(90));
 
-
-
-
-
     }
 
     private void rotateImage(int degrees) {
         if (capturedImageBitmap != null) {
-            // Aplica a rotação na imagem
-            matrix.postRotate(degrees); // Gira a imagem de acordo com a quantidade de graus
 
-            // Cria uma nova imagem com a rotação aplicada
+            matrix.postRotate(degrees);
+
             Bitmap rotatedBitmap = Bitmap.createBitmap(capturedImageBitmap, 0, 0, capturedImageBitmap.getWidth(), capturedImageBitmap.getHeight(), matrix, true);
 
-            // Atualiza a ImageView com a imagem rotacionada
             imageViewGallery.setImageBitmap(rotatedBitmap);
 
-            // Atualiza a imagem capturada com a imagem rotacionada
             capturedImageBitmap = rotatedBitmap;
         }
     }
@@ -128,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
-                    // Exibe mensagem padrão em caso de erro
+
                     textViewName.setText("");
                     Log.e("Firebase Error", "Error " + databaseError.getMessage());
                 }
