@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("com.google.gms.google-services")
+
 }
 
 android {
@@ -43,12 +44,12 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-
     implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
 
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
+    implementation ("com.google.firebase:firebase-storage")
     implementation ("com.google.firebase:firebase-functions:20.1.0")
     implementation ("jp.co.cyberagent.android:gpuimage:2.1.0")
     // Firebase Authentication
@@ -62,7 +63,6 @@ dependencies {
     implementation ("com.google.firebase:firebase-auth:21.0.5")
     implementation ("com.google.firebase:firebase-firestore:24.0.0")
     implementation ("com.google.firebase:firebase-analytics")
-    implementation ("jp.co.cyberagent.android:gpuimage:2.1.0")
     implementation ("androidx.constraintlayout:constraintlayout:2.1.4")
 
     implementation ("androidx.camera:camera-core:1.3.0")
@@ -72,6 +72,15 @@ dependencies {
 
     implementation ("jp.co.cyberagent.android:gpuimage:2.1.0")
 
+    implementation ("com.google.firebase:firebase-storage:19.2.1")
+
+
+    implementation ("com.google.firebase:firebase-auth:21.1.0")
+
+
+
+
 
 }
+
 

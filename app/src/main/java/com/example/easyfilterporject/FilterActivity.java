@@ -10,6 +10,7 @@ import android.os.Bundle;
 
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -27,10 +28,19 @@ import jp.co.cyberagent.android.gpuimage.filter.GPUImageGrayscaleFilter;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageSepiaToneFilter;
 
 import android.widget.Toast;
+
+import com.google.firebase.FirebaseApp;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+
 
 
 public class FilterActivity extends AppCompatActivity {
@@ -40,6 +50,7 @@ public class FilterActivity extends AppCompatActivity {
     private Bitmap originalBitmap;
     private GPUImage gpuImage;
     private GPUImageFilter activeFilter = null;
+    StorageReference storageReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,7 +139,11 @@ public class FilterActivity extends AppCompatActivity {
         });
 
         //After apply filter save the photo on my cell
-        iconSavePhoto.setOnClickListener(v -> savePhotoToGallery());
+        iconSavePhoto.setOnClickListener(v -> savePhotoToGalleryAndFirebase());
+
+
+        FirebaseApp.initializeApp(this);
+
     }
 
     private void applyGPUFilter(GPUImageFilter filter) {
@@ -296,6 +311,74 @@ public class FilterActivity extends AppCompatActivity {
                 e.printStackTrace();
                 Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
             }
+        }
+    }
+
+    //save on firestore
+    private void uploadImageToFirebase(Uri imageUri) {
+
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference();
+
+        // Nome do arquivo no Firebase Storage (adicione um timestamp para garantir nomes exclusivos)
+        String fileName = "images/filtered_" + System.currentTimeMillis() + ".png";
+
+        // Referência ao arquivo no Firebase
+        StorageReference imageRef = storageRef.child(fileName);
+
+        // Faça o upload
+        imageRef.putFile(imageUri)
+                .addOnSuccessListener(taskSnapshot -> {
+                    // Caso o upload tenha sucesso, exibe uma mensagem de sucesso
+                    Toast.makeText(this, "Imagem carregada no Firebase Storage!", Toast.LENGTH_SHORT).show();
+
+                    // Opcional: obter a URL do download da imagem
+                    imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                        // Aqui você pode armazenar a URL ou fazer algo com a imagem
+                        Log.d("Firebase", "URL de download: " + uri.toString());
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    // Caso o upload falhe, exibe uma mensagem de erro
+                    Toast.makeText(this, "Falha ao fazer upload para o Firebase Storage", Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                });
+    }
+
+
+    private void savePhotoToGalleryAndFirebase() {
+        if (gpuImage == null) {
+            Toast.makeText(this, "No image to save", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Bitmap resultBitmap = gpuImage.getBitmapWithFilterApplied();
+
+        try {
+            // Salvar na galeria
+            File picturesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+            File appDir = new File(picturesDir, "EasyFilterPhotos");
+            if (!appDir.exists()) appDir.mkdirs();
+
+            File imageFile = new File(appDir, "filtered_" + System.currentTimeMillis() + ".png");
+            FileOutputStream outputStream = new FileOutputStream(imageFile);
+            resultBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.close();
+
+            // Atualizar galeria
+            Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+            mediaScanIntent.setData(Uri.fromFile(imageFile));
+            sendBroadcast(mediaScanIntent);
+
+            Toast.makeText(this, "Saved to Gallery!", Toast.LENGTH_SHORT).show();
+
+            // Enviar para o Firebase Storage
+            Uri imageUri = Uri.fromFile(imageFile);
+            uploadImageToFirebase(imageUri);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
         }
     }
 }
