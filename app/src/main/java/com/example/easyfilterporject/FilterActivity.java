@@ -31,6 +31,7 @@ import android.widget.Toast;
 
 import com.google.firebase.FirebaseApp;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -319,12 +320,12 @@ public class FilterActivity extends AppCompatActivity {
     }
 
     //save on firestore
-    private void uploadImageToFirebase(Uri imageUri) {
+    private void uploadImageToFirebaseStorage(Bitmap resultBitmap) {
 
-        FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference storageRef = storage.getReference();
-
-        String fileName = "images/filtered_" + System.currentTimeMillis() + ".png";
+        if (resultBitmap == null) {
+            Toast.makeText(this, "No image to upload", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -332,71 +333,43 @@ public class FilterActivity extends AppCompatActivity {
             Toast.makeText(this, "User is not logged in", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        String userEmail = currentUser.getEmail();
         String userUid = currentUser.getUid();
+        String imagePath = "photos/" + userEmail + "/" + "filtered_" + System.currentTimeMillis() + ".png";
+        // Converter a imagem para byte array
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        resultBitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        byte[] imageData = baos.toByteArray();
 
-        //Conect user + photo
-        String email = currentUser.getEmail();
-        String name = currentUser.getDisplayName();
-
-        StorageReference imageRef = storageRef.child(fileName);
-
-        imageRef.putFile(imageUri)
-                .addOnSuccessListener(taskSnapshot -> {
-
-                    Toast.makeText(this, "Image uploaded to Firebase Storage!", Toast.LENGTH_SHORT).show();
-
-                    imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-
-                        saveImageDataToFirestore(uri.toString(), email, name,userUid);
-                    });
-                })
+        // Upload para Firebase Storage
+        StorageReference storageRef = FirebaseStorage.getInstance().getReference(imagePath);
+        storageRef.putBytes(imageData)
+                .addOnSuccessListener(taskSnapshot -> storageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                    // Passe os argumentos corretos para o método saveImageDataToDatabase
+                    saveImageDataToDatabase(uri.toString(), userEmail, userUid);
+                }))
                 .addOnFailureListener(e -> {
-
-                    Toast.makeText(this, "Fail upload Firebase Storage", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Failed to upload image", Toast.LENGTH_SHORT).show();
                     e.printStackTrace();
                 });
     }
 
-    private void saveImageDataToFirestore(String imageUrl, String email, String name, String userUid) {
-
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        DatabaseReference userImagesRef = database.child("users").child(userUid).child("user_images");
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-
-
-        if (currentUser != null) {
-            userUid = currentUser.getUid(); // Agora a variável userUid estará disponível fora do if
-        }
-
-        if (userUid == null) {
-            Toast.makeText(this, "User is not logged in", Toast.LENGTH_SHORT).show();
-            return;
-        }
+    private void saveImageDataToDatabase(String imageUrl, String email, String userUid) {
+        DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference("users").child(userUid).child("user_images");
 
         Map<String, Object> imageData = new HashMap<>();
         imageData.put("imageUrl", imageUrl);
         imageData.put("email", email);
-        imageData.put("name", name);
-        imageData.put("timestamp", FieldValue.serverTimestamp());
+        imageData.put("timestamp", System.currentTimeMillis());
 
-        userImagesRef.push().setValue(imageData)
-                .addOnSuccessListener(aVoid -> Toast.makeText(FilterActivity.this, "Image data saved to Realtime Database", Toast.LENGTH_SHORT).show())
-                .addOnFailureListener(e -> Toast.makeText(FilterActivity.this, "Failed to save image data", Toast.LENGTH_SHORT).show());
-
-        // Salvar os dados no Firestore
-        db.collection("users")
-                .document(userUid)
-                .collection("user_images")
-                .add(imageData)
-                .addOnSuccessListener(documentReference -> {
-                    Toast.makeText(this, "Image data saved to Firestore", Toast.LENGTH_SHORT).show();
-                })
+        databaseRef.push().setValue(imageData)
+                .addOnSuccessListener(aVoid -> Toast.makeText(this, "Image data saved to Database", Toast.LENGTH_SHORT).show())
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Failed to save image data", Toast.LENGTH_SHORT).show();
                     e.printStackTrace();
                 });
+
     }
 
 
@@ -427,14 +400,48 @@ public class FilterActivity extends AppCompatActivity {
 
             Toast.makeText(this, "Saved to Gallery!", Toast.LENGTH_SHORT).show();
 
-            // Enviar para o Firebase Storage
-            Uri imageUri = Uri.fromFile(imageFile);
-            uploadImageToFirebase(imageUri);
+            uploadBitmapToFirebaseStorage(resultBitmap);
 
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void uploadBitmapToFirebaseStorage(Bitmap resultBitmap) {
+
+        if (resultBitmap == null) {
+            Toast.makeText(this, "No image to upload", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (currentUser == null) {
+            Toast.makeText(this, "User is not logged in", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String userEmail = currentUser.getEmail();
+        String userUid = currentUser.getUid();
+        String imagePath = "photos/" + userEmail + "/" + "filtered_" + System.currentTimeMillis() + ".png";
+
+        // Converter a imagem para byte array
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        resultBitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        byte[] imageData = baos.toByteArray();
+
+        // Upload para Firebase Storage
+        StorageReference storageRef = FirebaseStorage.getInstance().getReference(imagePath);
+        storageRef.putBytes(imageData)
+                .addOnSuccessListener(taskSnapshot -> storageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                    saveImageDataToDatabase(uri.toString(), userEmail, userUid);
+
+                }))
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to upload image", Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                });
     }
 }
 

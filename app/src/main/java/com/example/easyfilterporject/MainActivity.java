@@ -31,7 +31,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -207,6 +210,7 @@ public class MainActivity extends AppCompatActivity {
 
     //save the photo on my cel
     private void savePhotoToGallery(Bitmap resultBitmap) {
+
         if (resultBitmap == null) {
             Toast.makeText(this, "No image to save", Toast.LENGTH_SHORT).show();
             return;
@@ -252,7 +256,54 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
             }
         }
+
+        // 2. Salvar no Firebase Storage
+        savePhotoToFirebaseStorage(resultBitmap);
     }
+    private void savePhotoToFirebaseStorage(Bitmap resultBitmap) {
+        if (resultBitmap == null) {
+            Toast.makeText(this, "No image to upload", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (currentUser != null) {
+            String userEmail = currentUser.getEmail();
+
+            String imagePath = "photos/" + userEmail + "/" + "filtered_" + System.currentTimeMillis() + ".png";
+
+            // Converter a imagem para byte array
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            resultBitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+            byte[] imageData = baos.toByteArray();
+
+            // Upload para o Firebase Storage
+            StorageReference storageRef = FirebaseStorage.getInstance().getReference(imagePath);
+            storageRef.putBytes(imageData)
+                    .addOnSuccessListener(taskSnapshot -> {
+
+                        storageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+
+                            saveImageUrlToDatabase(uri.toString());
+                        });
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(MainActivity.this, "Failed to upload image", Toast.LENGTH_SHORT).show();
+                    });
+        }
+    }
+
+    private void saveImageUrlToDatabase(String imageUrl) {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+            DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference("users");
+            databaseRef.child(userId).child("profileImage").setValue(imageUrl);
+        }
+    }
+
 
     private void setupUser() {
         // Retrieve name user (welcome user)
