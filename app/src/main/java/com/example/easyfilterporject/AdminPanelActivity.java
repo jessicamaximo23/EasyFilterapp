@@ -146,7 +146,6 @@ public class AdminPanelActivity extends AppCompatActivity  {
             Toast.makeText(AdminPanelActivity.this, "User name updated", Toast.LENGTH_SHORT).show();
         })
                 .addOnFailureListener(e -> {
-                    // Caso ocorra algum erro ao atualizar no Firebase
                     Toast.makeText(AdminPanelActivity.this, "Failed to update name in Database", Toast.LENGTH_SHORT).show();
                 });
     }
