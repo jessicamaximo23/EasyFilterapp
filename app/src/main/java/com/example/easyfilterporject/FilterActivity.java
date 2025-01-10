@@ -26,6 +26,8 @@ import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilter;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilterGroup;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageGrayscaleFilter;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageSepiaToneFilter;
+import jp.co.cyberagent.android.gpuimage.filter.GPUImageSketchFilter;
+
 import android.widget.Toast;
 import com.google.firebase.FirebaseApp;
 import java.io.ByteArrayOutputStream;
@@ -104,6 +106,7 @@ public class FilterActivity extends AppCompatActivity {
         findViewById(R.id.btnFilterSepia).setOnClickListener(v -> applySepiaFilter());
         findViewById(R.id.btnFilterNegative).setOnClickListener(v -> applyNegativeFilter());
         findViewById(R.id.btnFilterOriginal).setOnClickListener(v -> resetToOriginal());
+        findViewById(R.id.btnSketchFilter).setOnClickListener(v ->applySketchFilter());
 
 
         brightnessSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -181,22 +184,6 @@ public class FilterActivity extends AppCompatActivity {
         }
     }
 
-    private void saveAndReturn() {
-        if (gpuImage != null) {
-
-            Bitmap resultBitmap = gpuImage.getBitmapWithFilterApplied();
-
-            // Salva o Bitmap no cache e retorna o caminho do arquivo
-            String savedImagePath = saveBitmapToCache(resultBitmap);
-
-            if (savedImagePath != null) {
-                Toast.makeText(this, "Image saved at: " + savedImagePath, Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Failed to save the filtered image", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
     private String saveBitmapToCache(Bitmap bitmap) {
         try {
             File cacheDir = getCacheDir();
@@ -211,6 +198,19 @@ public class FilterActivity extends AppCompatActivity {
             return null;
         }
     }
+
+    private void applySketchFilter() {
+        activeFilter = new GPUImageSketchFilter();
+        updateBrightnessAndContrast();
+
+        applyGPUFilter(new GPUImageSketchFilter());
+
+        if (gpuImage != null) {
+            gpuImage.setFilter(new GPUImageSketchFilter());
+            filteredImageView.setImageBitmap(gpuImage.getBitmapWithFilterApplied());
+        }
+    }
+
 
     private void applyGrayScaleFilter() {
         activeFilter = new GPUImageGrayscaleFilter();

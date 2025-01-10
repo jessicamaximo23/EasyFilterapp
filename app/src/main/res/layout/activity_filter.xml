@@ -11,35 +11,35 @@
         android:id="@+id/filteredImageView"
         android:layout_width="match_parent"
         android:layout_height="300dp"
-        android:scaleType="centerCrop" />
+        android:scaleType="centerCrop"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Brightness"
         android:textSize="18sp"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"/>
 
     <SeekBar
         android:id="@+id/brightnessSeekBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:max="200"
-        android:progress="100" />
+        android:progress="100"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Contrast"
         android:textSize="18sp"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"/>
 
     <SeekBar
         android:id="@+id/contrastSeekBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:max="200"
-        android:progress="100" />
+        android:progress="100"/>
 
     <LinearLayout
         android:id="@+id/navigationBar"
@@ -143,6 +143,14 @@
             android:backgroundTint="#FFC107"
             android:text="Negative" />
 
+
+        <Button
+            android:id="@+id/btnSketchFilter"
+            android:layout_width="110dp"
+            android:layout_height="80dp"
+            android:backgroundTint="#212121"
+            android:text="Sketch" />
+
         <Button
             android:id="@+id/btnFilterOriginal"
             android:layout_width="110dp"
@@ -151,5 +159,6 @@
             android:text="Original" />
 
     </LinearLayout>
+
     </HorizontalScrollView>
 </LinearLayout>
