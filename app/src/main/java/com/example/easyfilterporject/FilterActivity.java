@@ -25,8 +25,10 @@ import jp.co.cyberagent.android.gpuimage.filter.GPUImageContrastFilter;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilter;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilterGroup;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageGrayscaleFilter;
+import jp.co.cyberagent.android.gpuimage.filter.GPUImagePixelationFilter;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageSepiaToneFilter;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageSketchFilter;
+import jp.co.cyberagent.android.gpuimage.filter.GPUImageToonFilter;
 
 import android.widget.Toast;
 import com.google.firebase.FirebaseApp;
@@ -107,6 +109,8 @@ public class FilterActivity extends AppCompatActivity {
         findViewById(R.id.btnFilterNegative).setOnClickListener(v -> applyNegativeFilter());
         findViewById(R.id.btnFilterOriginal).setOnClickListener(v -> resetToOriginal());
         findViewById(R.id.btnSketchFilter).setOnClickListener(v ->applySketchFilter());
+        findViewById(R.id.btnCartoon).setOnClickListener(v ->  applyCartoonFilter());
+        findViewById(R.id.btnPixel).setOnClickListener(v ->  applyPixelationFilter());
 
 
         brightnessSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -211,6 +215,18 @@ public class FilterActivity extends AppCompatActivity {
         }
     }
 
+    private void applyCartoonFilter() {
+        activeFilter = new GPUImageToonFilter();
+        updateBrightnessAndContrast();
+
+        applyGPUFilter(new  GPUImageToonFilter());
+
+        if (gpuImage != null) {
+            gpuImage.setFilter(new GPUImageToonFilter());
+            filteredImageView.setImageBitmap(gpuImage.getBitmapWithFilterApplied());
+        }
+    }
+
 
     private void applyGrayScaleFilter() {
         activeFilter = new GPUImageGrayscaleFilter();
@@ -247,6 +263,25 @@ public class FilterActivity extends AppCompatActivity {
             filteredImageView.setImageBitmap(gpuImage.getBitmapWithFilterApplied());
         }
     }
+
+    private void applyPixelationFilter () {
+
+        GPUImagePixelationFilter pixelationFilter = new GPUImagePixelationFilter();
+        pixelationFilter.setPixel(10.0f); // Ajusta o tamanho dos pixels
+
+        activeFilter = new GPUImagePixelationFilter();
+        updateBrightnessAndContrast();
+
+        applyGPUFilter(new GPUImagePixelationFilter());
+
+        if (gpuImage != null) {
+            gpuImage.setFilter(new GPUImagePixelationFilter());
+            filteredImageView.setImageBitmap(gpuImage.getBitmapWithFilterApplied());
+        }
+    }
+
+
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {

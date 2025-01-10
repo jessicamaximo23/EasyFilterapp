@@ -152,6 +152,21 @@
             android:text="Sketch" />
 
         <Button
+            android:id="@+id/btnCartoon"
+            android:layout_width="110dp"
+            android:layout_height="80dp"
+            android:backgroundTint="#03DAC5"
+            android:text="Cartoon" />
+
+        <Button
+            android:id="@+id/btnPixel"
+            android:layout_width="110dp"
+            android:layout_height="80dp"
+            android:backgroundTint="#BB86FC"
+            android:text="Pixel" />
+
+
+        <Button
             android:id="@+id/btnFilterOriginal"
             android:layout_width="110dp"
             android:layout_height="80dp"
