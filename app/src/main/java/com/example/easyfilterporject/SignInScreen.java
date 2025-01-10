@@ -91,20 +91,21 @@ public class SignInScreen extends AppCompatActivity {
                         FirebaseUser user = mAuth.getCurrentUser();
 
                         if (user != null) {
-                            Toast.makeText(SignInScreen.this, "Login Successful", Toast.LENGTH_SHORT).show();
-
-                            DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users").child(user.getUid());
+                            DatabaseReference usersRef = FirebaseDatabase.getInstance()
+                                    .getReference("users")
+                                    .child(user.getUid());
 
                             // Verifica se o usuário está bloqueado
                             usersRef.get().addOnCompleteListener(task1 -> {
                                 if (task1.isSuccessful() && task1.getResult().exists()) {
-                                    Boolean isBlocked = task1.getResult().child("isBlocked").getValue(Boolean.class);
+                                    Boolean isBlocked = task1.getResult().child("isBlocked")
+                                            .getValue(Boolean.class);
 
                                     if (Boolean.TRUE.equals(isBlocked)) {
-
                                         mAuth.signOut();
                                         Toast.makeText(SignInScreen.this, "Your account is blocked. Please contact support.", Toast.LENGTH_LONG).show();
                                     } else {
+                                        Toast.makeText(SignInScreen.this, "Login Successful", Toast.LENGTH_SHORT).show();
                                         // Verifica se é admin ou usuário comum
                                         navigateToNextScreen(email);
                                     }
