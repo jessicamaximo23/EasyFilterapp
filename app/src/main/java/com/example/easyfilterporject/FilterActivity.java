@@ -26,11 +26,8 @@ import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilter;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilterGroup;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageGrayscaleFilter;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageSepiaToneFilter;
-
 import android.widget.Toast;
-
 import com.google.firebase.FirebaseApp;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -38,13 +35,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -55,7 +49,6 @@ public class FilterActivity extends AppCompatActivity {
     private Bitmap originalBitmap;
     private GPUImage gpuImage;
     private GPUImageFilter activeFilter = null;
-    StorageReference storageReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,7 +139,6 @@ public class FilterActivity extends AppCompatActivity {
         //After apply filter save the photo on my cell
         iconSavePhoto.setOnClickListener(v -> savePhotoToGalleryAndFirebase());
 
-
         FirebaseApp.initializeApp(this);
 
     }
@@ -221,6 +213,8 @@ public class FilterActivity extends AppCompatActivity {
     }
 
     private void applyGrayScaleFilter() {
+        activeFilter = new GPUImageGrayscaleFilter();
+        updateBrightnessAndContrast();
 
         applyGPUFilter(new GPUImageGrayscaleFilter());
 
@@ -231,6 +225,8 @@ public class FilterActivity extends AppCompatActivity {
     }
 
     private void applySepiaFilter() {
+        activeFilter = new GPUImageSepiaToneFilter();
+        updateBrightnessAndContrast();
 
         applyGPUFilter(new GPUImageSepiaToneFilter());
 
@@ -241,6 +237,8 @@ public class FilterActivity extends AppCompatActivity {
     }
 
     private void applyNegativeFilter() {
+        activeFilter = new GPUImageColorInvertFilter();
+        updateBrightnessAndContrast();
 
         applyGPUFilter(new GPUImageColorInvertFilter());
 
