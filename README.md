@@ -21,17 +21,20 @@ Select any existing photo from your device’s gallery to apply filters.
  
 	Or, choose an existing photo from your gallery.
  
-3.	Apply Filters, Browse through the available filters and select your favorite one to enhance your photo.
-4.	
-5.	Save, Save the edited photo to your device.
+3.	Apply Filters, Browse through the available filters and select your favorite one to enhance your photo.	
+4.	Save the edited photo to your device.
 
 ## 🛠️ Technologies Used
 
-Firebase for Autentication
+Backend : 
 
-Storage for photos
+	✓ Firebase Authentication + Real Time , Data Base + Storage Photos 
 
-Java
+	✓ Frontend : AndroidSDK, XML Layouts 
+
+	✓ API : GPUImage 
+
+	✓ Admin Panel + User Panel
 
 
 ## 📩 Contact
