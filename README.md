@@ -32,7 +32,7 @@ Backend :
 
 	✓ Frontend : AndroidSDK, XML Layouts 
 
-	✓ API : GPUImage 
+	✓ GPUImage 
 
 	✓ Admin Panel + User Panel
 
